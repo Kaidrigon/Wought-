@@ -1,0 +1,197 @@
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    position: relative;
+    background: var(--background);
+}
+
+.app-layout__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.app-layout__content {
+    flex: 1;
+    position: relative;
+    overflow-x: clip;
+    padding: 0;
+}
+
+.app-layout__content > :last-child {
+    margin-bottom: var(--safe-bottom);
+}
+
+/* =========================================================
+   Offsets
+   ========================================================= */
+
+.inset {
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+}
+
+.inset--left {
+    padding-left: var(--safe-left);
+    padding-right: 0;
+}
+
+.inset--top {
+    padding-top: var(--safe-top);
+}
+
+/* =========================================================
+   Rows / Carousels
+   ========================================================= */
+
+.row {
+    position: relative;
+}
+
+.row__header {
+    padding-left: var(--safe-left);
+    padding-right: var(--space-xl);
+    margin-bottom: var(--space-md);
+}
+
+.row__track {
+    display: flex;
+    gap: var(--space-md);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    padding-left: var(--safe-left);
+    scroll-padding-left: var(--safe-left);
+    padding-right: var(--space-xl);
+    scrollbar-width: none;
+}
+
+.row__track::-webkit-scrollbar {
+    display: none;
+}
+
+.row__track > * {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+}
+
+.row__track {
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--safe-left),
+        #000 100%
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--safe-left),
+        #000 100%
+    );
+}
+
+@media (max-width: 768px) {
+    .row__track {
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+}
+
+/* =========================================================
+   Hero
+   ========================================================= */
+
+.hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    height: 100%;
+    min-height: var(--hero-height);
+    padding-bottom: clamp(var(--space-xl), 8vh, var(--space-3xl));
+    isolation: isolate;
+}
+
+.hero__media {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--hero-backdrop-position);
+    transform: scale(var(--hero-backdrop-scale));
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--hero-mask-left),
+        #000 100%
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        #000 var(--hero-mask-left),
+        #000 100%
+    );
+}
+
+/* Smooth top scrim without a hard cut */
+.hero::before,
+.hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.hero::before {
+    top: 0;
+    height: 45%;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.75) 0%,
+        rgba(0, 0, 0, 0.45) 35%,
+        rgba(0, 0, 0, 0.15) 70%,
+        transparent 100%
+    );
+}
+
+.hero::after {
+    bottom: 0;
+    height: var(--hero-scrim-bottom);
+    background: linear-gradient(
+        to top,
+        var(--background) 8%,
+        color-mix(in srgb, var(--background) 60%, transparent) 45%,
+        transparent 100%
+    );
+}
+
+.hero__inner {
+    position: relative;
+    max-width: var(--layout-content-width);
+    padding-left: var(--safe-left);
+}
+
+.hero + .row {
+    margin-top: calc(var(--space-2xl) * -1);
+}
+
+.hero--plain {
+    min-height: auto;
+    justify-content: center;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--space-2xl);
+}
+
+.hero--plain::before,
+.hero--plain::after {
+    display: none;
+}

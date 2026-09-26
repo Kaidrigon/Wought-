@@ -1,0 +1,213 @@
+.trending-section {
+
+    position: relative;
+
+    width: 100%;
+
+    padding-top: var(--space-2xl);
+
+    padding-bottom: var(--space-xl);
+
+}
+
+
+/* ================================================= */
+/* SECTION HEADER                                    */
+/* ================================================= */
+
+.trending-section__header {
+
+    padding-inline:
+        var(--layout-page-left)
+        var(--layout-page-right);
+
+    margin-bottom: var(--space-lg);
+
+}
+
+
+/* ================================================= */
+/* METALLIC EYEBROW                                  */
+/* ================================================= */
+
+.trending-section__eyebrow {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: var(--space-sm);
+
+    width: fit-content;
+
+    margin-bottom: var(--space-sm);
+
+    font-size: var(--font-sm);
+
+    font-weight: 700;
+
+    letter-spacing: .22em;
+
+    text-transform: uppercase;
+
+    color: transparent;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #c9c9cc 42%,
+            #737378 100%
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+}
+
+
+/* metallic accent line */
+
+.trending-section__eyebrow::before {
+
+    content: "";
+
+    display: block;
+
+    width: 2rem;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.85),
+            rgba(255,255,255,.15)
+        );
+
+}
+
+
+/* ================================================= */
+/* SECTION STATEMENT                                 */
+/* ================================================= */
+
+.trending-section__title {
+
+    margin: 0;
+
+    max-width: 44rem;
+
+    font-size: clamp(
+        1.65rem,
+        2.6vw,
+        2.4rem
+    );
+
+    line-height: 1.08;
+
+    font-weight: 700;
+
+    letter-spacing: -.035em;
+
+    color: rgba(255,255,255,.94);
+
+}
+
+
+/* ================================================= */
+/* SUBTLE CINEMA DETAIL                              */
+/* ================================================= */
+
+.trending-section__title::after {
+
+    content: "";
+
+    display: block;
+
+    width: 3rem;
+
+    height: 1px;
+
+    margin-top: var(--space-md);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.55),
+            transparent
+        );
+
+}
+
+
+/* ================================================= */
+/* MOBILE                                            */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+    .trending-section {
+
+        padding-top: var(--space-xl);
+
+    }
+
+
+    .trending-section__header {
+
+        padding-inline:
+            var(--layout-page-left-mobile)
+            var(--layout-page-right-mobile);
+
+        margin-bottom: var(--space-lg);
+
+    }
+
+
+    .trending-section__eyebrow {
+
+        font-size: var(--font-xs);
+
+        letter-spacing: .2em;
+
+        margin-bottom: var(--space-xs);
+
+    }
+
+
+    .trending-section__title {
+
+        max-width: 32rem;
+
+        font-size: 1.5rem;
+
+        line-height: 1.1;
+
+    }
+
+}
+
+
+/* ================================================= */
+/* SMALL MOBILE                                      */
+/* ================================================= */
+
+@media (max-width: 480px) {
+
+    .trending-section__title {
+
+        font-size: 1.35rem;
+
+    }
+
+
+    .trending-section__eyebrow::before {
+
+        width: 1.5rem;
+
+    }
+
+}

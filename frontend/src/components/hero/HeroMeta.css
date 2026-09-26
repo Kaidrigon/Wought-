@@ -1,0 +1,70 @@
+.hero-meta{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    row-gap:.8rem;
+
+    column-gap:.8rem;
+
+}
+
+.hero-meta__dot {
+
+    width: .3rem;
+
+    height: .3rem;
+
+    border-radius: 50%;
+
+    background: var(--border);
+
+}
+
+.hero-meta__genres {
+
+    display: flex;
+
+    gap: .5rem;
+
+}
+
+.hero-meta__genre {
+
+    padding: .28rem .7rem;
+
+    border-radius: 999px;
+
+    background: color-mix(
+        in srgb,
+        var(--accent) 12%,
+        transparent
+    );
+
+    border: 1px solid
+        color-mix(
+            in srgb,
+            var(--accent) 30%,
+            transparent
+        );
+
+    color: var(--text);
+
+}
+
+.hero-meta__rating {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: .35rem;
+
+    color: var(--accent);
+
+    font-weight: 600;
+
+}

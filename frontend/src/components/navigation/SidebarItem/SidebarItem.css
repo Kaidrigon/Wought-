@@ -1,0 +1,340 @@
+.sidebar-item {
+
+    position: relative;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap:
+        var(--space-md);
+
+    padding:
+        .85rem 1rem;
+
+    overflow: hidden;
+
+    border-radius:
+        var(--radius-md);
+
+    color:
+        var(--textSecondary);
+
+    text-decoration: none;
+
+    transition:
+        background
+        var(--duration-normal)
+        var(--ease-default),
+
+        color
+        var(--duration-normal)
+        var(--ease-default);
+
+}
+
+
+.sidebar-item:hover {
+
+    background:
+        var(--surfaceHover);
+
+    color:
+        var(--text);
+
+}
+
+
+.sidebar-item--active {
+
+    color:
+        var(--accent);
+
+}
+
+.sidebar-item__content {
+
+    position: relative;
+
+    z-index: 2;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap:
+        var(--space-md);
+
+}
+
+
+.sidebar-item__icon {
+
+    width:
+        1.5rem;
+
+    height:
+        1.5rem;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+.sidebar-item__label {
+
+    white-space: nowrap;
+
+    pointer-events: none;
+
+}
+
+.sidebar-highlight {
+
+    position: absolute;
+
+    inset: .25rem;
+
+    border-radius:
+        calc(
+            var(--radius-md) - .15rem
+        );
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--glass),
+            var(--accentMuted)
+        );
+
+    border:
+        1px solid
+        var(--glassBorder);
+
+    backdrop-filter:
+        blur(16px);
+
+    -webkit-backdrop-filter:
+        blur(16px);
+
+    box-shadow:
+        inset 0 1px
+        var(--glassReflection),
+
+        inset 0 -1px
+        rgba(255,255,255,.03),
+
+        0 0 22px
+        var(--accentGlow),
+
+        0 10px 24px
+        rgba(0,0,0,.28);
+
+    z-index: 0;
+
+}
+
+
+.sidebar-highlight__sweep {
+
+    position: absolute;
+
+    top: -35%;
+
+    left: 0;
+
+    width: 38%;
+
+    height: 170%;
+
+    pointer-events: none;
+
+    transform:
+        rotate(28deg);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+
+            color-mix(
+                in srgb,
+                var(--accentGlow) 70%,
+                white
+            ),
+
+            transparent
+        );
+
+    filter:
+        blur(10px);
+
+}
+
+
+.sidebar-highlight::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius:
+        inherit;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--glassReflection),
+            transparent 45%
+        );
+
+    opacity:
+        .55;
+
+    pointer-events:
+        none;
+
+}
+
+
+.sidebar-highlight::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 12%;
+
+    right: 12%;
+
+    bottom: 4px;
+
+    height: 8px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(0,0,0,.22);
+
+    filter:
+        blur(10px);
+
+    opacity:
+        .55;
+
+}
+
+@media (max-width: 768px) {
+
+    .sidebar-item {
+
+        flex:
+            1 1 0;
+
+        width:
+            auto;
+
+        min-width:
+            0;
+
+        justify-content:
+            center;
+
+        padding:
+            .7rem .45rem;
+
+        border-radius:
+            1rem;
+
+    }
+
+
+    .sidebar-item__content {
+
+        width:
+            100%;
+
+        justify-content:
+            center;
+
+        gap:
+            0;
+
+    }
+
+
+    .sidebar-item__icon {
+
+        width:
+            1.6rem;
+
+        height:
+            1.6rem;
+
+    }
+
+    .sidebar-item__label {
+
+        display:
+            none;
+
+    }
+
+
+    .sidebar-highlight {
+
+        inset:
+            .2rem;
+
+        border-radius:
+            .95rem;
+
+        box-shadow:
+            inset 0 1px
+            var(--glassReflection),
+
+            0 0 20px
+            var(--accentGlow),
+
+            0 8px 20px
+            rgba(0,0,0,.25);
+
+    }
+
+}
+
+@media (max-width: 420px) {
+
+    .sidebar-item {
+
+        padding:
+            .65rem .3rem;
+
+    }
+
+    .sidebar-item__icon {
+
+        width:
+            1.5rem;
+
+        height:
+            1.5rem;
+
+    }
+
+}

@@ -1,0 +1,18 @@
+export const TRAILER_BUTTON_LINES = [
+    "just 90 seconds to forget",
+    "Instead of Adding to",
+    "2 Minutes Because I Fear",
+    "Preview Because I'm Bored of",
+    "before you make a bad choice and forget about",
+    "a completely unnecessary preview coz i hate",
+    "Spoilers to Pretend I care About",
+    "This Or Go Back To Scrolling",
+    "To Avoid Looking At",
+    "Snippets Cuz I'm Too Lazy For",
+    "before you commit a mistake in ",
+    "Like A real adult or go bury it in",
+    "something for once instead of ruinning",
+    "2 minutes now and never open",
+    "Marketing baits to avoid updating",
+    "this or let it rot in",
+] as const;

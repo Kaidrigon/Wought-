@@ -1,0 +1,192 @@
+body {
+    margin: 0;
+    background: #0a0a0a;
+    color: #d9d9d9;
+}
+
+.opening-page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 24px;
+
+    background: #0a0a0a;
+}
+
+.opening-container {
+    width: 100%;
+    max-width: 720px;
+}
+
+.opening-box {
+    margin-top: 18px;
+
+    background: #111;
+
+    border: 1px solid #333;
+
+    border-radius: 12px;
+
+    padding: 24px;
+}
+
+.continue-button {
+
+    margin-top: 24px;
+
+    width: 100%;
+
+    min-height: 56px;
+
+    padding: 16px 20px;
+
+    background: transparent;
+
+    color: #9ea8b4;
+
+    border: 1px solid transparent;
+
+    border-radius: 10px;
+
+    font-family: monospace;
+
+    font-size: 15px;
+
+    text-align: left;
+
+    transition: all .28s ease;
+
+}
+.continue-button.active {
+
+    background: #1b1b1b;
+
+    border-color: #3b3b3b;
+
+    color: #d9d9d9;
+
+    cursor: pointer;
+
+}
+.continue-button.active {
+
+    animation: wakeUp .22s ease;
+}
+@keyframes wakeUp {
+
+    0% {
+
+        transform: scale(.985);
+
+        filter: brightness(.6);
+
+    }
+
+    50% {
+
+        transform: scale(1.01);
+
+        filter: brightness(1.35);
+
+    }
+
+    100% {
+
+        transform: scale(1);
+
+        filter: brightness(1);
+
+    }
+
+}
+
+.continue-button:hover:not(:disabled){
+
+    background:#262626;
+
+    border-color:#6a6a6a;
+
+}
+.continue-button:disabled{
+
+    cursor: default;
+
+    opacity:1;
+
+}
+.terminal-line {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: monospace;
+    line-height: 1.8;
+}
+.logo-line {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 5px;
+
+    background: linear-gradient(
+        180deg,
+        #d7dde3,
+        #153353
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.subtitle-line {
+
+    margin-top: 8px;
+
+    margin-bottom: 18px;
+
+    color: #7a7a7a;
+
+    font-size: 0.95rem;
+
+}
+.divider-line {
+
+    color: #444;
+
+    margin-bottom: 18px;
+
+}
+.boot-line {
+
+    margin: 0;
+
+    color: #8b9098;
+
+    font-family: monospace;
+
+    font-size: .92rem;
+
+    line-height: 1.7;
+
+}
+.cursor {
+
+    display: inline-block;
+
+}
+
+.blinking {
+
+    animation: blink .9s step-end infinite;
+
+}
+
+@keyframes blink {
+
+    50% {
+
+        opacity: 0;
+
+    }
+
+}

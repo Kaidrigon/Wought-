@@ -1,0 +1,155 @@
+:root {
+
+    --sidebar-rail-width: 4rem;
+    --scrollbar-width: .625rem;
+    --sidebar-width-collapsed: 5rem;
+    --sidebar-width-expanded: 15rem;
+
+    --topbar-height: 4.5rem;
+
+    --content-max-width: 120rem;
+
+    --floating-spacing: 1rem;
+
+
+
+    --space-2xs: .25rem;
+    --space-xs: .5rem;
+    --space-sm: .75rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+
+
+    --radius-sm: .5rem;
+    --radius-md: .75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.5rem;
+    --radius-pill: 999px;
+
+
+
+    --font-xs: .75rem;
+    --font-sm: .875rem;
+    --font-md: 1rem;
+    --font-lg: 1.125rem;
+    --font-xl: 1.5rem;
+    --font-2xl: 2rem;
+    --font-3xl: 3rem;
+
+
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+
+    --ease-default: cubic-bezier(.2,.8,.2,1);
+
+
+    --z-sidebar: 100;
+    --z-topbar: 200;
+    --z-modal: 1000;
+
+    --sidebar-floating-offset: 1rem;
+
+    --sidebar-floating-radius: 1.35rem;
+
+    --sidebar-panel-width: clamp(18rem, 22vw, 21rem);
+
+    --sidebar-glass: rgba(18,18,22,.68);
+
+    --sidebar-glass-border: rgba(255,255,255,.08);
+
+    --sidebar-glass-shadow:
+        0 25px 70px rgba(0,0,0,.55),
+        inset 0 1px rgba(255,255,255,.04);
+
+    --sidebar-blur: 28px;
+
+
+/* ================================================= */
+/* SAFE OFFSETS                                      */
+/* ------------------------------------------------- */
+/* These are NOT container padding. Nothing gets      */
+/* boxed by them. They are the distance an individual */
+/* piece of text or a row's first card is nudged in   */
+/* so the floating chrome can't sit on top of it.     */
+/* Backgrounds, artwork and carousels ignore them and */
+/* run to the viewport edge.                          */
+/*                                                    */
+/*   text-left = 1 + 4 + 1 = 6rem                     */
+/* ================================================= */
+
+--safe-top: calc(
+    var(--floating-spacing)
+    + var(--topbar-height)
+    + var(--space-md)
+);
+
+--safe-left: calc(
+    var(--sidebar-floating-offset)
+    + var(--sidebar-rail-width)
+    + var(--space-md)
+);
+
+/* Only used where a row genuinely has to stop early
+   (a grid, a form). Carousels never use this. */
+--safe-right: var(--space-xl);
+
+--safe-bottom: 5rem;
+
+
+/* ================================================= */
+/* LAYOUT                                            */
+/* ================================================= */
+
+--layout-content-width: 46rem;
+
+--layout-page-left: var(--safe-left);
+--layout-page-right: var(--safe-right);
+--layout-page-bottom: var(--safe-bottom);
+
+--layout-page-left-mobile: 1.25rem;
+--layout-page-right-mobile: 1.25rem;
+--layout-page-bottom-mobile: 2rem;
+
+
+/* ================================================= */
+/* HERO                                              */
+/* ================================================= */
+
+--hero-height: 100svh;
+
+--hero-backdrop-inset: 9%;
+--hero-backdrop-scale: 1.05;
+--hero-backdrop-position: center 35%;
+
+/* Top scrim must at least cover the navbar's footprint,
+   or the bar floats on bare artwork. */
+--hero-scrim-top: calc(var(--safe-top) + var(--space-3xl));
+--hero-scrim-bottom: 55%;
+
+/* Left fade so the rail keeps contrast behind it without
+   the image ending in a hard vertical line. */
+--hero-mask-left: 10%;
+
+}
+
+
+@media (max-width: 768px) {
+    :root {
+        --safe-top: calc(
+            var(--floating-spacing)
+            + var(--topbar-height)
+            + var(--space-sm)
+        );
+
+        --safe-left: var(--layout-page-left-mobile);
+        --safe-right: var(--layout-page-right-mobile);
+
+        --safe-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+
+        --hero-mask-left: 0%;
+    }
+}

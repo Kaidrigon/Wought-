@@ -1,0 +1,722 @@
+.anime-watch-page {
+    min-height: 100%;
+    width: 100%;
+
+    padding:
+        var(--safe-top)
+        1.25rem
+        3rem;
+
+    background:
+        var(--color-background);
+
+    color:
+        var(--color-text);
+}
+
+
+/* ================================
+   TOP BAR
+================================ */
+
+.anime-watch-page__topbar {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 1rem;
+}
+
+/* Keep the Back button clear of the desktop sidebar. */
+
+@media (min-width: 769px) {
+
+    .anime-watch-page__topbar {
+
+        padding-left:
+            var(--safe-left);
+    }
+}
+
+.anime-watch-page__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.5rem;
+
+    min-height: 2.5rem;
+
+    padding:
+        0.55rem
+        0.8rem;
+
+    border:
+        1px solid
+        var(--color-border);
+
+    border-radius:
+        0.65rem;
+
+    background:
+        var(--color-surface);
+
+    color:
+        var(--color-text-secondary);
+
+    font-size:
+        0.85rem;
+
+    font-weight:
+        600;
+
+    cursor: pointer;
+
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        color 180ms ease,
+        transform 180ms ease;
+}
+
+.anime-watch-page__back:hover {
+    background:
+        var(--color-surface-hover);
+
+    border-color:
+        var(--color-accent);
+
+    color:
+        var(--color-text);
+
+    transform:
+        translateX(-2px);
+}
+
+
+/* ================================
+   PLAYER
+================================ */
+
+.anime-watch-page__player {
+    width: 100%;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        var(--color-border);
+
+    border-radius:
+        0.9rem;
+
+    background:
+        #000;
+
+    box-shadow:
+        0 1rem 3rem
+        rgba(0, 0, 0, 0.35);
+}
+
+.anime-watch-page__player-state {
+    aspect-ratio:
+        16 / 9;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color:
+        var(--color-text-secondary);
+
+    font-size:
+        0.9rem;
+}
+
+
+/* ================================
+   CONTROLS
+================================ */
+
+.anime-watch-page__controls {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 1rem;
+
+    margin-top: 0.9rem;
+
+    padding:
+        0.7rem;
+
+    border:
+        1px solid
+        var(--color-border);
+
+    border-radius:
+        0.9rem;
+
+    background:
+        var(--color-surface);
+
+    box-shadow:
+        0 0.7rem 2rem
+        rgba(0, 0, 0, 0.2);
+}
+
+
+/* ================================
+   EPISODE CONTROLS
+================================ */
+
+.anime-watch-page__episode-controls {
+    display: flex;
+    align-items: center;
+
+    gap: 0.35rem;
+}
+
+.anime-watch-page__control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.35rem;
+
+    min-height: 2.55rem;
+
+    padding:
+        0.55rem
+        0.8rem;
+
+    border:
+        1px solid
+        transparent;
+
+    border-radius:
+        0.65rem;
+
+    background:
+        transparent;
+
+    color:
+        var(--color-text-secondary);
+
+    font-size:
+        0.8rem;
+
+    font-weight:
+        600;
+
+    cursor: pointer;
+
+    transition:
+        background 180ms ease,
+        color 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+}
+
+.anime-watch-page__control:hover:not(:disabled) {
+    background:
+        var(--color-accent-muted);
+
+    border-color:
+        var(--color-glass-border);
+
+    color:
+        var(--color-text);
+
+    transform:
+        translateY(-1px);
+}
+
+.anime-watch-page__control:disabled {
+    opacity:
+        0.3;
+
+    cursor:
+        not-allowed;
+}
+
+
+/* ================================
+   EPISODE NUMBER
+================================ */
+
+.anime-watch-page__episode {
+    min-width:
+        4.5rem;
+
+    height:
+        2.55rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 0.05rem;
+
+    padding:
+        0.25rem
+        0.65rem;
+
+    border:
+        1px solid
+        var(--color-glass-border);
+
+    border-radius:
+        0.65rem;
+
+    background:
+        var(--color-accent-muted);
+
+    text-align: center;
+}
+
+.anime-watch-page__episode span {
+    color:
+        var(--color-text-secondary);
+
+    font-size:
+        0.55rem;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.12em;
+}
+
+.anime-watch-page__episode strong {
+    color:
+        var(--color-text);
+
+    font-size:
+        0.9rem;
+
+    line-height:
+        1;
+}
+
+
+/* ================================
+   LANGUAGE SWITCH
+================================ */
+
+.anime-watch-page__language {
+    display: flex;
+    align-items: center;
+
+    gap: 0.55rem;
+
+    color:
+        var(--color-text-secondary);
+}
+
+.anime-watch-page__language-switch {
+    display: flex;
+    align-items: center;
+
+    padding:
+        0.2rem;
+
+    border:
+        1px solid
+        var(--color-glass-border);
+
+    border-radius:
+        0.7rem;
+
+    background:
+        var(--color-background);
+}
+
+.anime-watch-page__language-switch button {
+    min-width:
+        3.1rem;
+
+    min-height:
+        2.15rem;
+
+    padding:
+        0.45rem
+        0.65rem;
+
+    border:
+        0;
+
+    border-radius:
+        0.5rem;
+
+    background:
+        transparent;
+
+    color:
+        var(--color-text-secondary);
+
+    font-size:
+        0.7rem;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.08em;
+
+    cursor: pointer;
+
+    transition:
+        background 180ms ease,
+        color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.anime-watch-page__language-switch button:hover {
+    color:
+        var(--color-text);
+}
+
+.anime-watch-page__language-switch button.active {
+    background:
+        var(--color-accent);
+
+    color:
+        #050505;
+
+    box-shadow:
+        0 0 1rem
+        var(--color-accent-glow);
+}
+
+/* ================================
+   PROVIDER SWITCH
+================================ */
+
+.anime-watch-page__provider {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 0.55rem;
+
+    color:
+        var(--color-text-secondary);
+}
+
+.anime-watch-page__provider-label {
+
+    font-size:
+        0.6rem;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.1em;
+
+    opacity:
+        0.65;
+
+    white-space:
+        nowrap;
+}
+
+.anime-watch-page__provider-switch {
+
+    display: flex;
+
+    align-items: center;
+
+    padding:
+        0.2rem;
+
+    border:
+        1px solid
+        var(--color-glass-border);
+
+    border-radius:
+        0.7rem;
+
+    background:
+        var(--color-background);
+
+    overflow:
+        hidden;
+}
+
+.anime-watch-page__provider-switch button {
+
+    min-height:
+        2.15rem;
+
+    padding:
+        0.45rem
+        0.7rem;
+
+    border:
+        0;
+
+    border-radius:
+        0.5rem;
+
+    background:
+        transparent;
+
+    color:
+        var(--color-text-secondary);
+
+    font-family:
+        inherit;
+
+    font-size:
+        0.68rem;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 180ms ease,
+        color 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.anime-watch-page__provider-switch button:hover {
+
+    color:
+        var(--color-text);
+}
+
+.anime-watch-page__provider-switch button.active {
+
+    background:
+        var(--color-accent);
+
+    color:
+        #050505;
+
+    box-shadow:
+        0 0 1rem
+        var(--color-accent-glow);
+}
+
+/* ================================
+   ERROR STATE
+================================ */
+
+.anime-watch-page__state {
+    min-height:
+        70vh;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 1.25rem;
+
+    max-width:
+        40rem;
+
+    margin:
+        0 auto;
+
+    padding:
+        2rem;
+}
+
+.anime-watch-page__state h1 {
+    margin:
+        0;
+
+    color:
+        var(--color-text);
+
+    font-size:
+        clamp(
+            1.4rem,
+            3vw,
+            2rem
+        );
+
+    line-height:
+        1.2;
+}
+
+
+/* ================================
+   TABLET
+================================ */
+
+@media (max-width: 700px) {
+
+    .anime-watch-page__provider {
+    justify-content: center;
+    padding-top: 0.15rem;
+}
+
+.anime-watch-page__provider-switch {
+    flex: 1;
+    max-width: 18rem;
+}
+
+.anime-watch-page__provider-switch button {
+    flex: 1;
+}
+
+    .anime-watch-page {
+        padding:
+            var(--safe-top)
+            0.9rem
+            2rem;
+    }
+
+    .anime-watch-page__controls {
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 0.7rem;
+    }
+
+    .anime-watch-page__episode-controls {
+        width: 100%;
+
+        justify-content: space-between;
+    }
+
+    .anime-watch-page__control {
+        flex: 1;
+    }
+
+    .anime-watch-page__episode {
+        min-width:
+            4.5rem;
+    }
+
+    .anime-watch-page__language {
+        justify-content: center;
+
+        padding-top:
+            0.15rem;
+    }
+
+}
+
+
+/* ================================
+   SMALL MOBILE
+================================ */
+
+@media (max-width: 420px) {
+
+    .anime-watch-page__provider {
+    width: 100%;
+}
+
+.anime-watch-page__provider-label {
+    font-size: 0.55rem;
+}
+
+.anime-watch-page__provider-switch {
+    flex: 1;
+}
+
+.anime-watch-page__provider-switch button {
+    min-width: 0;
+    padding-inline: 0.55rem;
+    font-size: 0.64rem;
+}
+
+    .anime-watch-page {
+        padding:
+            var(--safe-top)
+            0.65rem
+            1.5rem;
+    }
+
+    .anime-watch-page__topbar {
+        margin-bottom:
+            0.65rem;
+    }
+
+    .anime-watch-page__back {
+        min-height:
+            2.3rem;
+
+        padding:
+            0.45rem
+            0.65rem;
+
+        font-size:
+            0.78rem;
+    }
+
+    .anime-watch-page__player {
+        border-radius:
+            0.65rem;
+    }
+
+    .anime-watch-page__controls {
+        margin-top:
+            0.65rem;
+
+        padding:
+            0.55rem;
+
+        border-radius:
+            0.75rem;
+    }
+
+    .anime-watch-page__control {
+        min-height:
+            2.4rem;
+
+        padding:
+            0.45rem
+            0.55rem;
+
+        font-size:
+            0.72rem;
+    }
+
+    .anime-watch-page__episode {
+        min-width:
+            3.9rem;
+
+        height:
+            2.4rem;
+    }
+
+    .anime-watch-page__episode span {
+        font-size:
+            0.5rem;
+    }
+
+    .anime-watch-page__episode strong {
+        font-size:
+            0.82rem;
+    }
+
+    .anime-watch-page__language-switch {
+        width: 100%;
+    }
+
+    .anime-watch-page__language-switch button {
+        flex: 1;
+
+        min-width:
+            0;
+    }
+
+}

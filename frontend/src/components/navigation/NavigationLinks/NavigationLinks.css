@@ -1,0 +1,27 @@
+.navigation-links {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: clamp(0.75rem, 2vw, 2rem);
+
+    min-width: 0;
+
+    flex-wrap: nowrap;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+
+    -ms-overflow-style: none;
+
+}
+
+.navigation-links::-webkit-scrollbar {
+
+    display: none;
+
+}

@@ -1,0 +1,157 @@
+.navbar {
+
+    position: fixed;
+
+    top: 1rem;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: calc(100% - 2rem);
+
+    max-width: 1700px;
+
+    min-height: var(--topbar-height);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: clamp(.75rem,2vw,2rem);
+
+    padding-inline: clamp(1rem,3vw,2rem);
+
+    z-index: 950;
+
+    background: rgba(12,12,14,.42);
+
+    backdrop-filter: blur(24px);
+
+    -webkit-backdrop-filter: blur(24px);
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    border-radius: 1.25rem;
+
+    box-shadow:
+
+        0 20px 60px rgba(0,0,0,.35),
+
+        inset 0 1px rgba(255,255,255,.08);
+
+}
+
+.navbar__left {
+
+    display: flex;
+
+    align-items: center;
+
+    flex-shrink: 0;
+
+}
+
+.navbar__center {
+
+    flex: 1;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+}
+
+.navbar__right {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: clamp(.5rem, 1.5vw, 1rem);
+
+    flex-shrink: 0;
+
+}
+
+.navbar__icon-button {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: clamp(2.25rem, 5vw, 2.6rem);
+
+    height: clamp(2.25rem, 5vw, 2.6rem);
+
+    border-radius: 50%;
+
+    color: var(--textSecondary);
+
+    transition:
+        background var(--duration-fast),
+        color var(--duration-fast),
+        transform var(--duration-fast);
+
+}
+
+.navbar__icon-button:hover {
+
+    background: rgba(255,255,255,.08);
+
+    color: var(--text);
+
+    transform: scale(1.05);
+
+}
+.navbar__avatar {
+
+    width: clamp(2rem, 5vw, 2.5rem);
+
+    height: clamp(2rem, 5vw, 2.5rem);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    color: var(--text);
+
+    font-size: clamp(.75rem, 2vw, .9rem);
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background var(--duration-fast),
+        border-color var(--duration-fast);
+
+}
+
+.navbar__avatar:hover {
+
+    background: rgba(255,255,255,.08);
+
+    border-color: var(--accent);
+
+}

@@ -1,0 +1,75 @@
+.hero-light{
+
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+
+    z-index:2;
+
+}
+
+.hero-light--ambient{
+
+    background:
+
+        radial-gradient(
+
+            circle at 72% 18%,
+
+            var(--accentGlow),
+
+            var(--accentSoft),
+
+            transparent 60%
+
+        );
+
+}
+
+
+.hero-light--spot{
+
+    background:
+
+    radial-gradient(
+
+        ellipse at center,
+
+        transparent 30%,
+
+        rgba(0,0,0,.22) 72%,
+
+        rgba(0,0,0,.72) 100%
+
+    );
+
+}
+
+.hero-light--bottom{
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(0,0,0,.92),
+            rgba(0,0,0,.45),
+            transparent 65%
+        );
+
+}
+.hero-light--accent{
+
+    background:
+
+        radial-gradient(
+
+            circle at 80% 55%,
+
+            var(--accentMuted),
+
+            transparent 55%
+
+        );
+
+}

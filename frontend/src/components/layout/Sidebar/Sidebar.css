@@ -1,0 +1,153 @@
+.sidebar {
+
+    position: fixed;
+
+    top:
+        calc(
+            var(--topbar-height)
+            + var(--sidebar-floating-offset)
+        );
+
+    left:
+        var(--sidebar-floating-offset);
+
+    width:
+        var(--sidebar-rail-width);
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: .25rem;
+
+    padding: .45rem;
+
+    overflow: hidden;
+
+    background:
+        var(--sidebar-glass);
+
+    backdrop-filter:
+        blur(var(--sidebar-blur));
+
+    -webkit-backdrop-filter:
+        blur(var(--sidebar-blur));
+
+    border:
+        1px solid
+        var(--sidebar-glass-border);
+
+    border-radius:
+        var(--sidebar-floating-radius);
+
+    box-shadow:
+        var(--sidebar-glass-shadow);
+
+    z-index:
+        900;
+}
+
+.sidebar--expanded {
+
+    width:
+        var(--sidebar-panel-width);
+
+}
+
+@media (max-width: 768px) {
+
+    .sidebar {
+
+        top: auto;
+
+        left: .75rem;
+
+        right: .75rem;
+
+        bottom:
+            calc(
+                .75rem
+                + env(safe-area-inset-bottom)
+            );
+
+        width:
+            calc(100% - 1.5rem) !important;
+
+        max-width:
+            34rem;
+
+        margin:
+            0 auto;
+
+        padding:
+            .45rem;
+
+        flex-direction:
+            row;
+
+        align-items:
+            center;
+
+        justify-content:
+            space-between;
+
+        gap:
+            .3rem;
+
+        border-radius:
+            1.35rem;
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(18,18,22,.78),
+                rgba(18,18,22,.62)
+            );
+
+        backdrop-filter:
+            blur(28px);
+
+        -webkit-backdrop-filter:
+            blur(28px);
+
+        box-shadow:
+            0 24px 60px rgba(0,0,0,.5),
+            inset 0 1px rgba(255,255,255,.06);
+
+    }
+
+    .sidebar--expanded {
+
+        width:
+            calc(100% - 1.5rem) !important;
+
+    }
+
+}
+
+@media (max-width: 420px) {
+
+    .sidebar {
+
+        left: .6rem;
+
+        right: .6rem;
+
+        bottom:
+            calc(
+                .6rem
+                + env(safe-area-inset-bottom)
+            );
+
+        width:
+            calc(100% - 1.2rem) !important;
+
+        padding:
+            .4rem;
+
+        gap:
+            .15rem;
+
+    }
+
+}

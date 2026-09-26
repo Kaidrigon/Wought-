@@ -1,0 +1,126 @@
+.hero-slide {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--background);
+    pointer-events: none;
+}
+
+/* ================================================= */
+/* ACTIVE SLIDE                                      */
+/* ================================================= */
+
+.hero-slide--active {
+    z-index: 2;
+    pointer-events: auto;
+
+    animation:
+        hero-active-in
+        900ms
+        cubic-bezier(.22, .61, .36, 1)
+        both;
+}
+
+/* ================================================= */
+/* PREVIOUS SLIDE                                    */
+/* ================================================= */
+
+.hero-slide--previous {
+    z-index: 1;
+
+    animation:
+        hero-previous-out
+        900ms
+        cubic-bezier(.22, .61, .36, 1)
+        both;
+}
+
+/* ================================================= */
+/* CINEMATIC EDGE                                    */
+/* ================================================= */
+
+.hero-slide::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    z-index: 20;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 0, 0, .46) 0%,
+            rgba(0, 0, 0, .16) 32%,
+            transparent 68%
+        ),
+        linear-gradient(
+            to top,
+            rgba(0, 0, 0, .72) 0%,
+            rgba(0, 0, 0, .24) 28%,
+            transparent 58%
+        );
+
+    opacity: .92;
+}
+
+/* ================================================= */
+/* HERO TRANSITION                                   */
+/* ================================================= */
+
+@keyframes hero-active-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes hero-previous-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* ================================================= */
+/* MOBILE                                            */
+/* ================================================= */
+
+@media (max-width: 768px) {
+    .hero-slide::after {
+        background:
+            linear-gradient(
+                to top,
+                rgba(0, 0, 0, .82) 0%,
+                rgba(0, 0, 0, .38) 32%,
+                transparent 66%
+            ),
+            linear-gradient(
+                180deg,
+                rgba(0, 0, 0, .16),
+                transparent 32%
+            );
+
+        opacity: .95;
+    }
+}
+
+/* ================================================= */
+/* REDUCED MOTION                                    */
+/* ================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-slide--active,
+    .hero-slide--previous {
+        animation: none;
+    }
+}

@@ -1,0 +1,318 @@
+.detail-information {
+    position: relative;
+    z-index: 2;
+    padding: 1rem var(--layout-page-right) 5rem var(--layout-page-left);
+    background: var(--background);
+}
+
+.detail-information__heading {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-information__heading span {
+    width: 1.5rem;
+    height: 1px;
+    background: var(--accent);
+}
+
+.detail-information__heading p {
+    margin: 0;
+    color: var(--accent);
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: .16em;
+}
+
+/* ---- GRID ---- */
+
+.detail-information__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--border);
+}
+
+.detail-information__grid > div,
+.detail-information__item {
+    min-height: 6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: .35rem;
+    padding: 1.25rem;
+    background: var(--surface);
+    color: var(--text);
+    text-align: left;
+}
+
+.detail-information__grid small {
+    color: var(--textSecondary);
+    font-size: var(--font-xs);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+
+.detail-information__grid strong {
+    color: var(--text);
+    font-size: var(--font-sm);
+    font-weight: 600;
+}
+
+/* ---- INTERACTIVE ITEM ---- */
+
+.detail-information__item {
+    position: relative;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default), color var(--duration-fast) var(--ease-default);
+}
+
+.detail-information__item:hover {
+    background: var(--surface-hover);
+}
+
+.detail-information__item--expanded {
+    background: var(--surface-hover);
+}
+
+.detail-information__item-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.detail-information__item-top small {
+    margin: 0;
+}
+
+.detail-information__season-icon {
+    color: var(--accent);
+    transition: transform 220ms ease;
+}
+
+.detail-information__item--expanded .detail-information__season-icon {
+    transform: rotate(180deg);
+}
+
+.detail-information__item-hint {
+    margin-top: .15rem;
+    color: var(--accent);
+    font-size: .65rem;
+    opacity: .7;
+}
+
+/* ================================================= */
+/* SEASONS                                           */
+/* ================================================= */
+
+.detail-seasons {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, var(--surface), var(--background));
+    overflow: hidden;
+}
+
+.detail-seasons__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+}
+
+.detail-seasons__header > div {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+}
+
+.detail-seasons__header > div span {
+    width: 1.4rem;
+    height: 1px;
+    background: var(--accent);
+}
+
+.detail-seasons__header p {
+    margin: 0;
+    color: var(--accent);
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: .15em;
+}
+
+.detail-seasons__header > span {
+    color: var(--textSecondary);
+    font-size: var(--font-xs);
+}
+
+.detail-seasons__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: .85rem;
+}
+
+/* ---- SEASON CARD ---- */
+
+.detail-season-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    transition: transform 220ms ease, border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+}
+
+.detail-season-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--glassBorder);
+    background: var(--surface-hover);
+    box-shadow: 0 16px 35px rgba(0, 0, 0, .25), 0 0 20px var(--accentMuted);
+}
+
+.detail-season-card__poster {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background: var(--background);
+}
+
+.detail-season-card__poster img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 350ms ease, filter 350ms ease;
+}
+
+.detail-season-card:hover .detail-season-card__poster img {
+    transform: scale(1.045);
+}
+
+.detail-season-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--textSecondary);
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--surface), var(--surface-hover));
+}
+
+.detail-season-card__content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .9rem;
+}
+
+.detail-season-card__content > div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.detail-season-card__content small {
+    color: var(--accent);
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+}
+
+.detail-season-card__content strong {
+    overflow: hidden;
+    color: var(--text);
+    font-size: .88rem;
+    font-weight: 650;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+}
+
+.detail-season-card__content > span {
+    flex-shrink: 0;
+    padding-top: .05rem;
+    color: var(--textSecondary);
+    font-size: .68rem;
+}
+
+.detail-season-card__icon {
+    position: absolute;
+    right: .8rem;
+    bottom: .8rem;
+    color: var(--accent);
+    transform: rotate(-90deg);
+    opacity: .8;
+}
+
+/* ================================================= */
+/* MOBILE                                            */
+/* ================================================= */
+
+@media (max-width: 768px) {
+    .detail-information {
+        padding: 1rem var(--layout-page-right-mobile) 4rem var(--layout-page-left-mobile);
+    }
+
+    .detail-information__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .detail-seasons {
+        padding: 1rem;
+    }
+
+    .detail-seasons__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .detail-information__grid > div,
+    .detail-information__item {
+        padding: 1rem;
+    }
+
+    .detail-seasons__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-seasons__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* ================================================= */
+/* REDUCED MOTION                                    */
+/* ================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .detail-season-card,
+    .detail-season-card__poster img,
+    .detail-information__item,
+    .detail-information__season-icon {
+        transition: none;
+    }
+}

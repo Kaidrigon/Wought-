@@ -1,0 +1,908 @@
+.person-page {
+    min-height: 100vh;
+    width: 100%;
+    background: var(--background);
+    color: var(--text);
+    padding-bottom: 5rem;
+    overflow-x: hidden;
+}
+
+/* ================================================= */
+/* SHARED SECTION                                    */
+/* ================================================= */
+
+.person-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.35rem;
+}
+
+.person-section-label span {
+    display: block;
+    width: 22px;
+    height: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.person-section-label p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+/* ================================================= */
+/* HEADER                                            */
+/* ================================================= */
+
+.person-header {
+    position: relative;
+    width: 100%;
+
+    /*
+     * Navbar is fixed at the top.
+     * Give the page enough breathing room so
+     * the back button never hides underneath it.
+     */
+    padding:
+        calc(var(--topbar-height) + 3rem)
+        clamp(1rem, 4vw, 4rem)
+        3.5rem;
+
+    border-bottom: 1px solid var(--border);
+
+    background:
+        radial-gradient(
+            circle at 20% 35%,
+            var(--accent-muted),
+            transparent 35%
+        ),
+        linear-gradient(
+            180deg,
+            var(--surface),
+            var(--background)
+        );
+}
+
+/* ================================================= */
+/* BACK BUTTON                                       */
+/* ================================================= */
+
+.person-header__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    margin-bottom: 2.5rem;
+    padding: 0.65rem 0.9rem;
+
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+
+    background: var(--glass);
+    color: var(--text-secondary);
+
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        color 180ms ease,
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+}
+
+.person-header__back:hover {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-color: var(--glass-border);
+    transform: translateX(-3px);
+}
+
+.person-header__back:active {
+    transform: translateX(-3px) scale(0.98);
+}
+
+/* ================================================= */
+/* HEADER CONTENT                                    */
+/* ================================================= */
+
+.person-header__content {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.25rem, 4vw, 3rem);
+
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ================================================= */
+/* PROFILE IMAGE                                     */
+/* ================================================= */
+
+.person-header__image,
+.person-header__placeholder {
+    flex: 0 0 auto;
+
+    width: clamp(130px, 18vw, 220px);
+
+    aspect-ratio: 2 / 3;
+
+    border-radius: 10px;
+
+    object-fit: cover;
+
+    border: 1px solid var(--glass-border);
+
+    background: var(--surface);
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.45),
+        0 0 35px var(--accent-muted);
+}
+
+.person-header__placeholder {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--text-secondary);
+
+    font-size: 2rem;
+
+    font-weight: 700;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--surface),
+            var(--surface-hover)
+        );
+}
+
+/* ================================================= */
+/* HEADER DETAILS                                    */
+/* ================================================= */
+
+.person-header__details {
+    min-width: 0;
+}
+
+.person-header__details .person-section-label {
+    margin-bottom: 0.9rem;
+}
+
+.person-header__details h1 {
+    margin: 0;
+
+    color: var(--text);
+
+    font-size: clamp(2rem, 6vw, 4.5rem);
+
+    font-weight: 700;
+
+    line-height: 0.95;
+
+    letter-spacing: -0.045em;
+
+    text-wrap: balance;
+}
+
+.person-header__department {
+    margin: 1rem 0 0;
+
+    color: var(--accent);
+
+    font-size: 0.75rem;
+
+    font-weight: 700;
+
+    letter-spacing: 0.14em;
+
+    text-transform: uppercase;
+}
+
+/* ================================================= */
+/* INFORMATION                                       */
+/* ================================================= */
+
+.person-information,
+.person-biography,
+.person-credits {
+    width: min(1100px, calc(100% - 2rem));
+
+    margin: 0 auto;
+
+    padding: 3rem 0 0;
+}
+
+.person-information__grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap: 1px;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: var(--border);
+}
+
+.person-information__grid > div {
+    min-width: 0;
+
+    padding: 1.25rem;
+
+    background: var(--surface);
+
+    transition:
+        background 180ms ease;
+}
+
+.person-information__grid > div:hover {
+    background: var(--surface-hover);
+}
+
+.person-information__grid small {
+    display: block;
+
+    margin-bottom: 0.45rem;
+
+    color: var(--text-secondary);
+
+    font-size: 0.65rem;
+
+    font-weight: 700;
+
+    letter-spacing: 0.13em;
+
+    text-transform: uppercase;
+}
+
+.person-information__grid strong {
+    display: block;
+
+    color: var(--text);
+
+    font-size: 0.9rem;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    overflow-wrap: anywhere;
+}
+
+/* ================================================= */
+/* BIO                                               */
+/* ================================================= */
+
+.person-biography {
+    max-width: 900px;
+}
+
+.person-biography__text {
+    max-width: 850px;
+
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size:
+        clamp(
+            0.9rem,
+            1.5vw,
+            1rem
+        );
+
+    line-height: 1.85;
+}
+
+/* ================================================= */
+/* CREDITS                                           */
+/* ================================================= */
+
+.person-credits {
+    padding-bottom: 2rem;
+}
+
+.person-credits__grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            5,
+            minmax(0, 1fr)
+        );
+
+    gap: 0.8rem;
+}
+
+/* ================================================= */
+/* CREDIT CARD                                       */
+/* ================================================= */
+
+.person-credit-card {
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 220ms ease,
+        border-color 220ms ease,
+        background 220ms ease,
+        box-shadow 220ms ease;
+}
+
+.person-credit-card:hover {
+    transform: translateY(-5px);
+
+    border-color: var(--glass-border);
+
+    background: var(--surface-hover);
+
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.35),
+        0 0 25px var(--accent-muted);
+}
+
+.person-credit-card:active {
+    transform: translateY(-2px);
+}
+
+/* ================================================= */
+/* CREDIT POSTER                                    */
+/* ================================================= */
+
+.person-credit-card__poster {
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 2 / 3;
+
+    overflow: hidden;
+
+    background: var(--background);
+}
+
+.person-credit-card__poster::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            transparent 50%,
+            rgba(0, 0, 0, 0.45)
+        );
+
+    pointer-events: none;
+}
+
+.person-credit-card__poster img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    transition:
+        transform 350ms ease,
+        filter 350ms ease;
+}
+
+.person-credit-card:hover
+.person-credit-card__poster img {
+    transform: scale(1.045);
+}
+
+/* ================================================= */
+/* PLACEHOLDER                                       */
+/* ================================================= */
+
+.person-credit-card__placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--text-secondary);
+
+    font-size: 1.5rem;
+
+    font-weight: 700;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--surface),
+            var(--surface-hover)
+        );
+}
+
+/* ================================================= */
+/* CREDIT CONTENTS                                  */
+/* ================================================= */
+
+.person-credit-card__content {
+    display: flex;
+
+    flex-direction: column;
+
+    min-width: 0;
+
+    padding: 0.85rem;
+}
+
+.person-credit-card__content strong {
+    display: -webkit-box;
+
+    overflow: hidden;
+
+    color: var(--text);
+
+    font-size: 0.82rem;
+
+    font-weight: 650;
+
+    line-height: 1.25;
+
+    line-clamp: 2;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+}
+
+.person-credit-card__content span {
+    display: -webkit-box;
+
+    margin-top: 0.35rem;
+
+    overflow: hidden;
+
+    color: var(--text-secondary);
+
+    font-size: 0.68rem;
+
+    line-height: 1.35;
+
+    line-clamp: 2;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+}
+
+.person-credit-card__content small {
+    margin-top: 0.55rem;
+
+    color: var(--accent);
+
+    font-size: 0.62rem;
+
+    font-weight: 700;
+
+    letter-spacing: 0.1em;
+}
+
+/* ================================================= */
+/* LOADING                                           */
+/* ================================================= */
+
+.person-loading {
+    min-height: 70vh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 1.25rem;
+
+    color: var(--text-secondary);
+
+    text-align: center;
+}
+
+.person-loading__orb {
+    width: 42px;
+    height: 42px;
+
+    border: 1px solid var(--border);
+
+    border-top-color: var(--accent);
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 25px var(--accent-glow);
+
+    animation:
+        person-spin
+        900ms
+        linear
+        infinite;
+}
+
+.person-loading p {
+    margin: 0;
+
+    font-size: 0.72rem;
+
+    letter-spacing: 0.08em;
+
+    text-transform: lowercase;
+}
+
+/* ================================================= */
+/* ERROR                                             */
+/* ================================================= */
+
+.person-error {
+    width: min(500px, calc(100% - 2rem));
+
+    min-height: 70vh;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    justify-content: center;
+}
+
+.person-error > span {
+    color: var(--accent);
+
+    font-size:
+        clamp(
+            4rem,
+            12vw,
+            7rem
+        );
+
+    font-weight: 800;
+
+    line-height: 0.85;
+
+    letter-spacing: -0.08em;
+
+    opacity: 0.8;
+}
+
+.person-error h1 {
+    margin: 1rem 0 0;
+
+    color: var(--text);
+
+    font-size:
+        clamp(
+            1.7rem,
+            5vw,
+            2.5rem
+        );
+
+    line-height: 1;
+
+    letter-spacing: -0.04em;
+}
+
+.person-error p {
+    margin: 1rem 0 1.5rem;
+
+    color: var(--text-secondary);
+
+    font-size: 0.9rem;
+
+    line-height: 1.65;
+}
+
+.person-error button {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 0.5rem;
+
+    padding: 0.7rem 1rem;
+
+    border: 1px solid var(--glass-border);
+
+    border-radius: 8px;
+
+    background: var(--glass);
+
+    color: var(--text);
+
+    font: inherit;
+
+    font-size: 0.78rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+}
+
+.person-error button:hover {
+    background: var(--accent-soft);
+
+    border-color: var(--accent);
+
+    transform: translateX(-3px);
+}
+
+/* ================================================= */
+/* ANIME                                             */
+/* ================================================= */
+
+.person-page--anime .person-header {
+    background:
+        radial-gradient(
+            circle at 20% 35%,
+            var(--accent-muted),
+            transparent 38%
+        ),
+        linear-gradient(
+            180deg,
+            var(--surface),
+            var(--background)
+        );
+}
+
+/* ================================================= */
+/* TABLET                                            */
+/* ================================================= */
+
+@media (max-width: 1024px) {
+
+    .person-credits__grid {
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(0, 1fr)
+            );
+    }
+
+}
+
+/* ================================================= */
+/* MOBILE                                            */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+    .person-header {
+        padding:
+            calc(var(--topbar-height) + 2rem)
+            1rem
+            2.5rem;
+    }
+
+    .person-header__back {
+        margin-bottom: 1.75rem;
+    }
+
+    .person-header__content {
+        align-items: flex-start;
+
+        gap: 1rem;
+    }
+
+    .person-header__image,
+    .person-header__placeholder {
+        width: 110px;
+    }
+
+    .person-header__details h1 {
+        font-size:
+            clamp(
+                1.65rem,
+                8vw,
+                2.7rem
+            );
+    }
+
+    .person-header__department {
+        font-size: 0.65rem;
+    }
+
+    .person-information,
+    .person-biography,
+    .person-credits {
+        width: calc(100% - 2rem);
+
+        padding-top: 2.25rem;
+    }
+
+    .person-information__grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+
+    .person-credits__grid {
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(0, 1fr)
+            );
+
+        gap: 0.65rem;
+    }
+
+    .person-credit-card__content {
+        padding: 0.65rem;
+    }
+
+    .person-credit-card__content strong {
+        font-size: 0.72rem;
+    }
+
+    .person-credit-card__content span {
+        font-size: 0.62rem;
+    }
+
+}
+
+/* ================================================= */
+/* SMALL MOBILE                                      */
+/* ================================================= */
+
+@media (max-width: 480px) {
+
+    .person-page {
+        padding-bottom: 3rem;
+    }
+
+    .person-header {
+        padding:
+            calc(var(--topbar-height) + 1.5rem)
+            1rem
+            2.25rem;
+    }
+
+    .person-header__content {
+        align-items: center;
+    }
+
+    .person-header__image,
+    .person-header__placeholder {
+        width: 92px;
+    }
+
+    .person-header__details h1 {
+        font-size: 1.55rem;
+    }
+
+    .person-header__department {
+        margin-top: 0.65rem;
+    }
+
+    .person-information__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .person-information__grid > div {
+        padding: 1rem;
+    }
+
+    .person-credits__grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+
+    .person-credit-card__content {
+        padding: 0.7rem;
+    }
+
+    .person-credit-card__content strong {
+        font-size: 0.74rem;
+    }
+
+    .person-credit-card__content span {
+        font-size: 0.61rem;
+    }
+
+    .person-section-label {
+        margin-bottom: 1rem;
+    }
+
+}
+
+/* ================================================= */
+/* MOTION                                            */
+/* ================================================= */
+
+@keyframes person-spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+/* ================================================= */
+/* REDUCED MOTION                                    */
+/* ================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .person-loading__orb {
+        animation: none;
+    }
+
+    .person-credit-card,
+    .person-credit-card__poster img,
+    .person-header__back,
+    .person-error button {
+        transition: none;
+    }
+
+}

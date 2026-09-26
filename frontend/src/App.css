@@ -1,0 +1,101 @@
+.app-shell {
+    position: relative;
+
+    width: 100%;
+    min-height: 100vh;
+
+    overflow: hidden;
+
+    background: #000;
+}
+
+
+/* ================================================= */
+/* OPENING                                            */
+/* ================================================= */
+
+.app-opening-layer {
+    position: relative;
+
+    z-index: 10;
+
+    width: 100%;
+    min-height: 100vh;
+
+    opacity: 1;
+
+    transform: scale(1);
+
+    transform-origin: center;
+
+    transition:
+        opacity .75s cubic-bezier(.22, .61, .36, 1),
+        transform .75s cubic-bezier(.22, .61, .36, 1);
+
+    will-change:
+        opacity,
+        transform;
+}
+
+
+/* ================================================= */
+/* CINEMA                                             */
+/* ================================================= */
+
+.app-content-layer {
+    position: relative;
+
+    z-index: 1;
+
+    width: 100%;
+    min-height: 100vh;
+
+    opacity: 1;
+
+    transform: scale(1);
+
+    transition:
+        opacity .75s cubic-bezier(.22, .61, .36, 1),
+        transform .75s cubic-bezier(.22, .61, .36, 1);
+
+    will-change:
+        opacity,
+        transform;
+}
+
+
+/* ================================================= */
+/* HANDOFF                                           */
+/* ================================================= */
+
+.app-shell--transitioning
+.app-opening-layer {
+
+    opacity: 0;
+
+    transform: scale(1.015);
+}
+
+
+.app-shell--transitioning
+.app-content-layer {
+
+    opacity: 1;
+
+    transform: scale(1);
+}
+
+
+/* ================================================= */
+/* REDUCE MOTION                                     */
+/* ================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .app-opening-layer,
+    .app-content-layer {
+
+        transition: none;
+        transform: none;
+    }
+}

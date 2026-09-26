@@ -1,0 +1,82 @@
+.detail-page {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    background: var(--background);
+    color: var(--text);
+}
+
+/* ================================================= */
+/* LOADING                                           */
+/* ================================================= */
+
+.detail-loading {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--textSecondary);
+}
+
+.detail-loading__orb {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--glassBorder);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: detailSpin 900ms linear infinite;
+}
+
+@keyframes detailSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ================================================= */
+/* ERROR                                             */
+/* ================================================= */
+
+.detail-error {
+    min-height: 100svh;
+    max-width: 42rem;
+    margin: auto;
+    padding: 8rem 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.detail-error > span {
+    color: var(--accent);
+    font-size: var(--font-xs);
+    font-weight: 700;
+    letter-spacing: .2em;
+}
+
+.detail-error h1 {
+    margin: .75rem 0 0;
+    color: var(--text);
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: -.05em;
+}
+
+.detail-error p {
+    margin: 1rem 0 1.5rem;
+    color: var(--textSecondary);
+    line-height: 1.6;
+}
+
+.detail-error button {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}

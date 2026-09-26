@@ -1,0 +1,355 @@
+.hero-content {
+
+    position: absolute;
+
+    left: var(--layout-page-left);
+
+    bottom: 6.75rem;
+
+    z-index: 30;
+
+    width: min(46rem, 72vw);
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 1.15rem;
+
+    pointer-events: none;
+
+}
+
+/* ================================================= */
+/* INTERACTION                                       */
+/* ================================================= */
+
+.hero-content__identity,
+.hero-content .hero-actions {
+
+    pointer-events: auto;
+
+}
+
+/* ================================================= */
+/* EDITORIAL MARKER                                  */
+/* ================================================= */
+
+.hero-content__eyebrow {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: .65rem;
+
+    height: 1.1rem;
+
+    margin-left: .15rem;
+
+    color: rgba(255, 255, 255, .58);
+
+    user-select: none;
+
+}
+
+.hero-content__eyebrow-line {
+
+    display: block;
+
+    width: 1.8rem;
+
+    height: 1px;
+
+    background: var(--accent);
+
+    box-shadow:
+        0 0 12px
+        var(--accentGlow);
+
+}
+
+.hero-content__eyebrow-label {
+
+    font-size: .62rem;
+
+    font-weight: 700;
+
+    letter-spacing: .18em;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+/* ================================================= */
+/* IDENTITY                                          */
+/* ================================================= */
+
+.hero-content__identity {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    width: 100%;
+
+    min-height: 5rem;
+
+}
+
+/* ================================================= */
+/* LOGO                                              */
+/* ================================================= */
+
+.hero-content__logo-image {
+
+    display: block;
+
+    width: clamp(
+        18rem,
+        32vw,
+        34rem
+    );
+
+    max-width: 100%;
+
+    max-height: 11rem;
+
+    object-fit: contain;
+
+    object-position: left bottom;
+
+    filter:
+        drop-shadow(
+            0 12px 28px
+            rgba(0, 0, 0, .78)
+        );
+
+    user-select: none;
+
+}
+
+/* ================================================= */
+/* FALLBACK TITLE                                    */
+/* ================================================= */
+
+.hero-content__title {
+
+    margin: 0;
+
+    max-width: 100%;
+
+    font-size: clamp(
+        3.5rem,
+        6vw,
+        6rem
+    );
+
+    font-weight: 850;
+
+    line-height: .88;
+
+    letter-spacing: -.055em;
+
+    color: var(--text);
+
+    text-wrap: balance;
+
+    text-shadow:
+        0 12px 32px
+        rgba(0, 0, 0, .68);
+
+}
+
+/* ================================================= */
+/* ACTION RELATIONSHIP                               */
+/* ================================================= */
+
+.hero-content .hero-actions {
+
+    margin-left: .15rem;
+
+}
+
+/* ================================================= */
+/* LARGE DESKTOP                                     */
+/* ================================================= */
+
+@media (min-width: 1280px) {
+
+    .hero-content {
+
+        bottom: 7rem;
+
+        width: min(
+            48rem,
+            56vw
+        );
+
+        gap: 1.2rem;
+
+    }
+
+    .hero-content__logo-image {
+
+        width: clamp(
+            22rem,
+            30vw,
+            38rem
+        );
+
+        max-height: 13rem;
+
+    }
+
+}
+
+/* ================================================= */
+/* TABLET                                            */
+/* ================================================= */
+
+@media (max-width: 1024px) {
+
+    .hero-content {
+
+        bottom: 6rem;
+
+        width: min(
+            40rem,
+            76vw
+        );
+
+    }
+
+    .hero-content__logo-image {
+
+        width: min(
+            30rem,
+            48vw
+        );
+
+        max-height: 10rem;
+
+    }
+
+}
+
+/* ================================================= */
+/* MOBILE                                            */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+    .hero-content {
+
+        left:
+            calc(
+                var(--sidebar-rail-width)
+                + 1rem
+            );
+
+        right: 1.25rem;
+
+        bottom: 4.25rem;
+
+        width: auto;
+
+        gap: 1rem;
+
+    }
+
+    .hero-content__eyebrow {
+
+        margin-left: 0;
+
+        gap: .55rem;
+
+    }
+
+    .hero-content__eyebrow-line {
+
+        width: 1.35rem;
+
+    }
+
+    .hero-content__eyebrow-label {
+
+        font-size: .57rem;
+
+        letter-spacing: .15em;
+
+    }
+
+    /*
+     * Mobile heroes use poster artwork.
+     *
+     * The poster already contains the title/logo,
+     * so we don't duplicate it with a separate
+     * logo or text title.
+     */
+
+    .hero-content__identity {
+
+        display: none;
+
+    }
+
+    .hero-content .hero-actions {
+
+        margin-left: 0;
+
+    }
+
+}
+
+/* ================================================= */
+/* SMALL MOBILE                                      */
+/* ================================================= */
+
+@media (max-width: 480px) {
+
+    .hero-content {
+
+        left:
+            calc(
+                var(--sidebar-rail-width)
+                + .75rem
+            );
+
+        right: .75rem;
+
+        bottom: 3.25rem;
+
+        gap: .85rem;
+
+    }
+
+    .hero-content__eyebrow-label {
+
+        font-size: .52rem;
+
+        letter-spacing: .13em;
+
+    }
+
+}
+
+/* ================================================= */
+/* REDUCED MOTION                                    */
+/* ================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-content__logo-image {
+
+        transition: none;
+
+    }
+
+}

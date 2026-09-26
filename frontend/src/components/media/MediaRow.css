@@ -1,0 +1,51 @@
+.media-row {
+
+    width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scrollbar-width: none;
+
+    overscroll-behavior-inline: contain;
+
+    -webkit-overflow-scrolling: touch;
+
+}
+
+
+.media-row::-webkit-scrollbar {
+    display: none;
+}
+
+
+.media-row__track {
+
+    display: flex;
+
+    gap: var(--space-md);
+
+    width: max-content;
+
+    padding-left: var(--layout-page-left);
+    padding-right: var(--layout-page-right);
+
+    padding-bottom: var(--space-xs);
+
+}
+
+
+/* ================================================= */
+/* MOBILE                                            */
+/* ================================================= */
+
+@media (max-width: 768px) {
+
+    .media-row__track {
+
+        padding-left: var(--layout-page-left-mobile);
+        padding-right: var(--layout-page-right-mobile);
+
+    }
+
+}

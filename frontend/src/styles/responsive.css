@@ -1,0 +1,32 @@
+@media (max-width: 768px) {
+
+    :root {
+
+        --sidebar-width-collapsed: 4rem;
+
+        --sidebar-width-expanded: 14rem;
+
+        --topbar-height: 4rem;
+
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    :root {
+
+        --sidebar-width-collapsed: 3.75rem;
+
+        --sidebar-width-expanded: 13rem;
+
+        --topbar-height: 3.75rem;
+
+        --space-xl: 1.25rem;
+
+        --space-lg: 1rem;
+
+    }
+
+}
