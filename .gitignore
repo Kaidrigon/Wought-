@@ -23,5 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 # Ignore environment variables
+*.env
+*.env.*
+**/*.env
 backend/apki.env
 frontend/.env.local
