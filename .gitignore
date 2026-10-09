@@ -36,5 +36,5 @@ frontend/.env.local
 *$py.class
 
 # Vite caching (Frontend)
-**/.vite/
-**/.vite/deps
+/.vite/
+/.vite/deps
