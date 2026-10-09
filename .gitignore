@@ -35,6 +35,7 @@ frontend/.env.local
 *.py[cod]
 *$py.class
 
-# Vite caching (Frontend)
-/.vite/
-/.vite/deps
+# Vite caching
+.vite/
+**/.vite/
+
