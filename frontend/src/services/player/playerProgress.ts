@@ -1,4 +1,4 @@
-const PROGRESS_PREFIX = "wought:progress:";
+const PROGRESS_PREFIX = "wought:progress";
 
 export type LocalProgress = {
     currentTime: number;

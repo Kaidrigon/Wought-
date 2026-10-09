@@ -4,13 +4,24 @@ import {
 
 import Hero from "../components/hero/Hero";
 
-import HeroNavigation from "../components/hero/HeroNavigation";
+import HeroNavigation
+    from "../components/hero/HeroNavigation";
 
-import TrendingSection from "../components/sections/TrendingSection";
+import DonationJokeSection
+    from "../components/sections/DonationJokeSection";
 
-import NowPlayingSection from "../components/sections/NowPlayingSection";
+import ContinueWatchingSection
+    from "../components/sections/ContinueWatchingSection";
 
-import { useHero } from "../hooks/useHero";
+import TrendingSection
+    from "../components/sections/TrendingSection";
+
+import NowPlayingSection
+    from "../components/sections/NowPlayingSection";
+
+import {
+    useHero,
+} from "../hooks/useHero";
 
 import "./CinemaPage.css";
 
@@ -19,6 +30,7 @@ type HeroDirection =
     | "previous";
 
 export default function CinemaPage() {
+
     const {
         heroes,
         loading,
@@ -38,6 +50,7 @@ export default function CinemaPage() {
         nextIndex: number,
         nextDirection: HeroDirection
     ) => {
+
         if (
             heroes.length <= 1 ||
             nextIndex === activeIndex
@@ -55,12 +68,17 @@ export default function CinemaPage() {
     };
 
     const goNext = () => {
-        if (heroes.length <= 1) {
+
+        if (
+            heroes.length <= 1
+        ) {
             return;
         }
 
         const nextIndex =
-            (activeIndex + 1) %
+            (
+                activeIndex + 1
+            ) %
             heroes.length;
 
         goToSlide(
@@ -70,7 +88,10 @@ export default function CinemaPage() {
     };
 
     const goPrevious = () => {
-        if (heroes.length <= 1) {
+
+        if (
+            heroes.length <= 1
+        ) {
             return;
         }
 
@@ -126,6 +147,10 @@ export default function CinemaPage() {
             </section>
 
             <div className="home-page__content">
+
+                <DonationJokeSection />
+
+                <ContinueWatchingSection />
 
                 <TrendingSection />
 
