@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-    "https://wought.onrender.com/";
+    "https://wought.onrender.com";
 
 function getToken() {
 
