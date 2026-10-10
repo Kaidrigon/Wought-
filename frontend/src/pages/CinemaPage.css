@@ -18,7 +18,7 @@
 }
 
 /* ================================================= */
-/* CINEMATIC BOTTOM TRANSITION                        */
+/* CINEMATIC BOTTOM TRANSITION                       */
 /* ================================================= */
 
 .home-page__hero::after {
@@ -56,22 +56,32 @@
 
 @media (max-width: 768px) {
     .home-page__hero {
-        height: 90svh;
-        min-height: 34rem;
+        height: 72svh;
+        min-height: 28rem;
     }
 
     .home-page__hero::after {
-        height: 14rem;
+        height: 12rem;
     }
 }
 
 @media (max-width: 480px) {
     .home-page__hero {
-        height: 90svh;
-        min-height: 32rem;
+        height: 68svh;
+        min-height: 25rem;
     }
 
     .home-page__hero::after {
-        height: 12rem;
+        height: 10rem;
+    }
+}
+
+/* ================================================= */
+/* REDUCED MOTION                                    */
+/* ================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .home-page__hero {
+        scroll-behavior: auto;
     }
 }
