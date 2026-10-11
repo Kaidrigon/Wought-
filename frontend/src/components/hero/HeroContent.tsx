@@ -34,7 +34,7 @@ export default function HeroContent({
                 )}
             </div>
 
-            <HeroActions />
+            <HeroActions hero={hero} />
         </section>
     );
 }

@@ -6,15 +6,30 @@ import {
 
 import { motion } from "framer-motion";
 
+import { Link } from "react-router-dom";
+
+import type { HeroData } from "../../types/hero";
+
 import "./HeroActions.css";
 
-export default function HeroActions() {
+type HeroActionsProps = {
+    hero: HeroData;
+};
+
+export default function HeroActions({
+    hero,
+}: HeroActionsProps) {
+    const detailPath =
+        `/cinema/${hero.media_type}/${hero.tmdb_id}`;
+
+    const watchPath =
+        `${detailPath}/watch`;
 
     return (
-
         <div className="hero-actions">
 
-            <motion.button
+            {/* PLAY */}
+            <motion.div
                 whileHover={{
                     y: -3,
                     scale: 1.02,
@@ -22,28 +37,29 @@ export default function HeroActions() {
                 whileTap={{
                     scale: 0.97,
                 }}
-                className="
-                    hero-action
-                    hero-action--primary
-                "
             >
+                <Link
+                    to={watchPath}
+                    className="
+                        hero-action
+                        hero-action--primary
+                    "
+                    aria-label={`Play ${hero.title}`}
+                >
+                    <span className="hero-action__indicator" />
 
-                <span className="hero-action__indicator" />
+                    <Play
+                        size={20}
+                        fill="currentColor"
+                    />
 
-                <Play
-                    size={20}
-                    fill="currentColor"
-                />
+                    <span>Play</span>
+                </Link>
+            </motion.div>
 
-                <span>
-
-                    Play
-
-                </span>
-
-            </motion.button>
-
+            {/* ARCHIVE — COMING LATER */}
             <motion.button
+                type="button"
                 whileHover={{
                     y: -3,
                     scale: 1.02,
@@ -52,21 +68,19 @@ export default function HeroActions() {
                     scale: 0.97,
                 }}
                 className="hero-action"
+                disabled
+                title="Archive will be available when accounts are ready"
+                aria-label="Archive — coming soon"
             >
-
                 <span className="hero-action__indicator" />
 
                 <Archive size={20} />
 
-                <span>
-
-                    Archive
-
-                </span>
-
+                <span>Archive</span>
             </motion.button>
 
-            <motion.button
+            {/* DOSSIER */}
+            <motion.div
                 whileHover={{
                     y: -3,
                     scale: 1.02,
@@ -74,23 +88,20 @@ export default function HeroActions() {
                 whileTap={{
                     scale: 0.97,
                 }}
-                className="hero-action"
             >
+                <Link
+                    to={detailPath}
+                    className="hero-action"
+                    aria-label={`View dossier for ${hero.title}`}
+                >
+                    <span className="hero-action__indicator" />
 
-                <span className="hero-action__indicator" />
+                    <FileText size={20} />
 
-                <FileText size={20} />
-
-                <span>
-
-                    Dossier
-
-                </span>
-
-            </motion.button>
+                    <span>Dossier</span>
+                </Link>
+            </motion.div>
 
         </div>
-
     );
-
 }
