@@ -1,7 +1,5 @@
 import NavItem from "../NavItem";
 
-
-
 import { navigation } from "../../../data/navigation";
 
 import "./NavigationLinks.css";
