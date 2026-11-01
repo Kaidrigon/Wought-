@@ -57,8 +57,7 @@ async def discover_tmdb(
     media_type: str,
     page: int,
     extra_params: dict | None = None,
-) -> list[dict]:
-
+) -> dict:
     params = {
         "page": page,
         **(extra_params or {}),
@@ -70,7 +69,7 @@ async def discover_tmdb(
         params=params,
     )
 
-    return [
+    results = [
         {
             "tmdb_id": item.get("id"),
             "media_type": media_type,
@@ -94,3 +93,10 @@ async def discover_tmdb(
         }
         for item in data.get("results", [])
     ]
+
+    return {
+        "page": data.get("page", page),
+        "total_pages": min(data.get("total_pages", 1), 500),
+        "total_results": data.get("total_results", 0),
+        "results": results,
+    }

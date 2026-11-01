@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-
+import { API_BASE_URL } from "../../services/api/api";
 import type { HeroData } from "../../types/hero";
 
 import "./MediaCard.css";
@@ -15,7 +15,11 @@ export default function MediaCard({
         media.media_type === "movie"
             ? `/cinema/movie/${media.tmdb_id}`
             : `/cinema/tv/${media.tmdb_id}`;
-
+const posterSrc = media.poster_link
+    ? media.poster_link.startsWith("http")
+        ? media.poster_link
+        : `${API_BASE_URL}${media.poster_link}`
+    : null;
     return (
         <Link
             to={detailPath}
@@ -23,9 +27,9 @@ export default function MediaCard({
             aria-label={`View details for ${media.title}`}
         >
             <div className="media-card__poster">
-                {media.poster_link ? (
+                {posterSrc ? (
                     <img
-                        src={media.poster_link}
+                        src={posterSrc}
                         alt={media.title}
                         loading="lazy"
                     />
