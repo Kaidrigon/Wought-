@@ -6,13 +6,11 @@ import type {
 
 import { cinemaosProvider } from "./providers/cinemaos";
 import { framextvProvider } from "./providers/framextv";
-import { peachifyProvider } from "./providers/peachify";
 import { vidsrcProvider } from "./providers/vidsrc";
 
 const providers: VideoProvider[] = [
     cinemaosProvider,
     framextvProvider,
-    peachifyProvider,
     vidsrcProvider,
 ].sort(
     (a, b) =>

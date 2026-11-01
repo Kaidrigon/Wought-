@@ -5,7 +5,6 @@ export type PlayerMediaType =
 export type PlayerProviderId =
     | "cinemaos"
     | "framextv"
-    | "peachify"
     | "vidsrc";
 
 export type PlayerRequest = {

@@ -32,9 +32,8 @@ function buildQuery(
     );
 
     /*
-     * Wought+ already handles resume
-     * through startAt, so frameXTV
-     * receives the same timestamp.
+     * Wought+ handles resume
+     * through startAt.
      */
     if (
         request.startAt != null &&

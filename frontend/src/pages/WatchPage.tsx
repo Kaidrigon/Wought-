@@ -1,3 +1,4 @@
+
 import {
     useCallback,
     useEffect,
@@ -58,12 +59,8 @@ import "./WatchPage.css";
 const API_BASE_URL =
     "http://0.0.0.0:8000";
 
-const PEACHIFY_BASE_URL =
-    import.meta.env.VITE_PEACHIFY_BASE_URL ??
-    "https://peachify.top";
-
-const FRAMEXTV_BASE_URL = 
-    import.meta.env.VITE_FRAMEXTV_BASE_URL ?? 
+const FRAMEXTV_BASE_URL =
+    import.meta.env.VITE_FRAMEXTV_BASE_URL ??
     "https://framextv.tech";
 
 const CINEMAOS_BASE_URL =
@@ -202,19 +199,16 @@ export default function WatchPage() {
      * PROVIDER
      * =================================================
      *
-     * Peachify is the default.
-     *
-     * The user can switch between
-     * Peachify, CinemaOS and VidSrc
-     * underneath the player.
+     * Available providers:
+     * CinemaOS, frameXTV and VidSrc.
      */
 
     const [
-            selectedProviderId,
+        selectedProviderId,
         setSelectedProviderId,
     ] = useState<PlayerProviderId>(
         "cinemaos"
-);
+    );
 
 
     /*
@@ -419,13 +413,6 @@ export default function WatchPage() {
 
     /*
      * =================================================
-     * PROVIDER BASE URL
-     * =================================================
-     */
-
-
-    /*
-     * =================================================
      * PLAYER URL
      * =================================================
      *
@@ -436,51 +423,43 @@ export default function WatchPage() {
      * supported provider.
      */
 
-const player = useMemo(() => {
-    if (!playerRequest) {
-        return null;
-    }
+    const player = useMemo(() => {
+        if (!playerRequest) {
+            return null;
+        }
 
-    return buildPlayerUrl(
-        playerRequest,
-        {
-            /*
-             * Fallback value.
-             * Each provider gets its own
-             * URL from providerBaseUrls.
-             */
-            baseUrl:
-                CINEMAOS_BASE_URL,
-
-            providerBaseUrls: {
-                cinemaos:
+        return buildPlayerUrl(
+            playerRequest,
+            {
+                baseUrl:
                     CINEMAOS_BASE_URL,
 
-                framextv:
-                    FRAMEXTV_BASE_URL,
+                providerBaseUrls: {
+                    cinemaos:
+                        CINEMAOS_BASE_URL,
 
-                peachify:
-                    PEACHIFY_BASE_URL,
+                    framextv:
+                        FRAMEXTV_BASE_URL,
 
-                vidsrc:
-                    VIDSRC_BASE_URL,
+                    vidsrc:
+                        VIDSRC_BASE_URL,
+                },
+
+                autoplay: true,
+
+                autonext:
+                    mediaType === "tv",
+
+                subtitleLanguage:
+                    "en",
             },
-
-            autoplay: true,
-
-            autonext:
-                mediaType === "tv",
-
-            subtitleLanguage:
-                "en",
-        },
-        selectedProviderId
-    );
-}, [
-    playerRequest,
-    selectedProviderId,
-    mediaType,
-]);
+            selectedProviderId
+        );
+    }, [
+        playerRequest,
+        selectedProviderId,
+        mediaType,
+    ]);
 
 
     /*
@@ -633,7 +612,6 @@ const player = useMemo(() => {
                     return;
                 }
 
-
                 /*
                  * If this is an episode player,
                  * make sure the event belongs to
@@ -665,7 +643,6 @@ const player = useMemo(() => {
                     }
                 }
 
-
                 /*
                  * Normal playback event.
                  */
@@ -681,7 +658,6 @@ const player = useMemo(() => {
 
                     return;
                 }
-
 
                 /*
                  * Save immediately when the user
@@ -703,18 +679,9 @@ const player = useMemo(() => {
                     return;
                 }
 
-
                 /*
                  * timeupdate is intentionally ignored
                  * for now.
-                 *
-                 * CinemaOS can emit these events
-                 * frequently, so sending every one
-                 * to the backend would create
-                 * unnecessary requests.
-                 *
-                 * A throttled progress-sync layer
-                 * can be added later.
                  */
 
                 if (
@@ -724,7 +691,6 @@ const player = useMemo(() => {
                     return;
                 }
 
-
                 /*
                  * Completed playback.
                  */
@@ -733,11 +699,6 @@ const player = useMemo(() => {
                     event.status ===
                     "completed"
                 ) {
-                    /*
-                     * Remove local resume data
-                     * because this item is finished.
-                     */
-
                     clearLocalProgress({
                         mediaType,
 
@@ -755,10 +716,8 @@ const player = useMemo(() => {
                                 : null,
                     });
 
-
                     /*
                      * Send 100% to backend.
-                     *
                      * The backend will move it
                      * into Watch History.
                      */
@@ -779,7 +738,14 @@ const player = useMemo(() => {
                 persistProgress,
             ]
         );
-// back navigation
+
+
+    /*
+     * =================================================
+     * BACK NAVIGATION
+     * =================================================
+     */
+
     const handleBack =
         () => {
             if (isEpisodePage) {
@@ -840,9 +806,7 @@ const player = useMemo(() => {
                         className="watch-page__back"
                         onClick={handleBack}
                     >
-                        <ArrowLeft
-                            size={16}
-                        />
+                        <ArrowLeft size={16} />
 
                         Back
                     </button>
@@ -888,9 +852,7 @@ const player = useMemo(() => {
                     className="watch-page__back"
                     onClick={handleBack}
                 >
-                    <ArrowLeft
-                        size={16}
-                    />
+                    <ArrowLeft size={16} />
 
                     Back
                 </button>
@@ -901,17 +863,16 @@ const player = useMemo(() => {
             <main className="watch-page__player">
 
                 <VideoPlayer
-                    key={`${player.provider.id}:${player.url}`}
-                    url={player.url}
-                    title={
-                        episodeLabel
-                            ? `${displayTitle} — ${episodeLabel}`
-                            : displayTitle
-                    }
-                    onEvent={
-                        handlePlayerEvent
-                    }
-                />
+    key={`${player.provider.id}:${player.url}`}
+    provider={player.provider.id}
+    url={player.url}
+    title={
+        episodeLabel
+            ? `${displayTitle} — ${episodeLabel}`
+            : displayTitle
+    }
+    onEvent={handlePlayerEvent}
+/>
 
 
                 <div
@@ -926,74 +887,56 @@ const player = useMemo(() => {
 
                     <div className="watch-page__provider-buttons">
 
-                        
                         <button
                             type="button"
-                                className={`watch-page__provider-button ${
-                                selectedProviderId ===
-                                "cinemaos"
+                            className={`watch-page__provider-button ${
+                                selectedProviderId === "cinemaos"
                                     ? "watch-page__provider-button--active"
                                     : ""
-                                    }`}
-                                        onClick={() =>
-                                            setSelectedProviderId(
-                                            "cinemaos"
-        )
-    }
->
-                                        CinemaOS
-</button>
+                            }`}
+                            onClick={() =>
+                                setSelectedProviderId(
+                                    "cinemaos"
+                                )
+                            }
+                        >
+                            CinemaOS
+                        </button>
 
-                                <button
-                                    type="button"
-                                    className={`watch-page__provider-button ${
-        selectedProviderId ===
-        "framextv"
-            ? "watch-page__provider-button--active"
-            : ""
-    }`}
-    onClick={() =>
-        setSelectedProviderId(
-            "framextv"
-        )
-    }
->
-    frameXTV
-</button>
 
-    <button
-    type="button"
-    className={`watch-page__provider-button ${
-        selectedProviderId ===
-        "peachify"
-            ? "watch-page__provider-button--active"
-            : ""
-    }`}
-    onClick={() =>
-        setSelectedProviderId(
-            "peachify"
-        )
-    }
->
-    Peachify
-</button>
+                        <button
+                            type="button"
+                            className={`watch-page__provider-button ${
+                                selectedProviderId === "framextv"
+                                    ? "watch-page__provider-button--active"
+                                    : ""
+                            }`}
+                            onClick={() =>
+                                setSelectedProviderId(
+                                    "framextv"
+                                )
+                            }
+                        >
+                            frameXTV
+                        </button>
 
-    <button
-    type="button"
-    className={`watch-page__provider-button ${
-        selectedProviderId ===
-        "vidsrc"
-            ? "watch-page__provider-button--active"
-            : ""
-    }`}
-    onClick={() =>
-        setSelectedProviderId(
-            "vidsrc"
-        )
-    }
->
-    VidSrc
-</button>
+
+                        <button
+                            type="button"
+                            className={`watch-page__provider-button ${
+                                selectedProviderId === "vidsrc"
+                                    ? "watch-page__provider-button--active"
+                                    : ""
+                            }`}
+                            onClick={() =>
+                                setSelectedProviderId(
+                                    "vidsrc"
+                                )
+                            }
+                        >
+                            VidSrc
+                        </button>
+
                     </div>
 
                 </div>

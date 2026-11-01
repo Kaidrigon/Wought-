@@ -1,7 +1,7 @@
 .search-page {
     position: relative;
 
-    margin-top: var(--topbar-height);
+    
 
     min-height: calc(100svh - var(--topbar-height));
 
