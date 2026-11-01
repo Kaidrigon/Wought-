@@ -1,4 +1,7 @@
-import { useEffect } from "react";
+
+import { useEffect, useRef } from "react";
+
+import { Maximize2 } from "lucide-react";
 
 import "./VideoPlayer.css";
 
@@ -11,7 +14,6 @@ import type {
 } from "../../services/player/types";
 
 type VideoPlayerProps = {
-    provider?: string;
     url: string;
     title?: string;
     onEvent?: (
@@ -24,6 +26,9 @@ export default function VideoPlayer({
     title = "Wought+ Player",
     onEvent,
 }: VideoPlayerProps) {
+
+    const containerRef =
+        useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const handleMessage = (
@@ -52,8 +57,31 @@ export default function VideoPlayer({
         };
     }, [onEvent]);
 
+    const handleFullscreen = async () => {
+        const container =
+            containerRef.current;
+
+        if (!container) return;
+
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            } else {
+                await container.requestFullscreen();
+            }
+        } catch (error) {
+            console.error(
+                "Fullscreen request failed:",
+                error
+            );
+        }
+    };
+
     return (
-        <div className="video-player">
+        <div
+            ref={containerRef}
+            className="video-player"
+        >
             <iframe
                 className="video-player__iframe"
                 src={url}
@@ -67,6 +95,16 @@ export default function VideoPlayer({
                 "
                 referrerPolicy="origin"
             />
+
+            <button
+                type="button"
+                className="video-player__fullscreen"
+                onClick={handleFullscreen}
+                aria-label="Toggle fullscreen"
+                title="Fullscreen"
+            >
+                <Maximize2 size={20} />
+            </button>
         </div>
     );
 }

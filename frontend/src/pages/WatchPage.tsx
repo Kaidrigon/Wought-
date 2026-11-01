@@ -862,9 +862,9 @@ export default function WatchPage() {
 
             <main className="watch-page__player">
 
-                <VideoPlayer
+                
+<VideoPlayer
     key={`${player.provider.id}:${player.url}`}
-    provider={player.provider.id}
     url={player.url}
     title={
         episodeLabel
@@ -873,6 +873,7 @@ export default function WatchPage() {
     }
     onEvent={handlePlayerEvent}
 />
+
 
 
                 <div
