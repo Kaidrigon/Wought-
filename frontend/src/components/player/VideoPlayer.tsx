@@ -1,5 +1,3 @@
-
-
 import { useEffect } from "react";
 
 import "./VideoPlayer.css";
@@ -10,11 +8,10 @@ import {
 
 import type {
     PlayerEvent,
-    PlayerProviderId,
 } from "../../services/player/types";
 
 type VideoPlayerProps = {
-    provider: PlayerProviderId;
+    provider?: string;
     url: string;
     title?: string;
     onEvent?: (
@@ -22,22 +19,7 @@ type VideoPlayerProps = {
     ) => void;
 };
 
-const PROVIDER_SANDBOX: Record<
-    PlayerProviderId,
-    string
-> = {
-    cinemaos:
-        "allow-scripts allow-same-origin allow-forms",
-
-    framextv:
-        "allow-scripts allow-same-origin allow-forms",
-
-    vidsrc:
-        "allow-scripts allow-same-origin allow-forms",
-};
-
 export default function VideoPlayer({
-    provider,
     url,
     title = "Wought+ Player",
     onEvent,
@@ -76,7 +58,6 @@ export default function VideoPlayer({
                 className="video-player__iframe"
                 src={url}
                 title={title}
-                sandbox={PROVIDER_SANDBOX[provider]}
                 allowFullScreen
                 allow="
                     autoplay;
