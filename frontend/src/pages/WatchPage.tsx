@@ -1,4 +1,3 @@
-
 import {
     useCallback,
     useEffect,
@@ -57,7 +56,7 @@ import "./WatchPage.css";
  */
 
 const API_BASE_URL =
-    "http://0.0.0.0:8000";
+    "https://wought.onrender.com";
 
 const FRAMEXTV_BASE_URL =
     import.meta.env.VITE_FRAMEXTV_BASE_URL ??
@@ -71,6 +70,9 @@ const VIDSRC_BASE_URL =
     import.meta.env.VITE_VIDSRC_BASE_URL ??
     "https://vidsrc2.ru";
 
+const VIDFAST_BASE_URL =
+    import.meta.env.VITE_VIDFAST_BASE_URL ??
+    "https://vidfast.vc";
 
 /*
  * =================================================
@@ -443,6 +445,8 @@ export default function WatchPage() {
 
                     vidsrc:
                         VIDSRC_BASE_URL,
+                    vidfast:
+                        VIDFAST_BASE_URL,
                 },
 
                 autoplay: true,
@@ -904,6 +908,19 @@ export default function WatchPage() {
                             CinemaOS
                         </button>
 
+                            <button
+    type="button"
+    className={`watch-page__provider-button ${
+        selectedProviderId === "vidfast"
+            ? "watch-page__provider-button--active"
+            : ""
+    }`}
+    onClick={() =>
+        setSelectedProviderId("vidfast")
+    }
+>
+    VidFast
+</button>
 
                         <button
                             type="button"

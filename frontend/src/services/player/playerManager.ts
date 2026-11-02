@@ -7,11 +7,13 @@ import type {
 import { cinemaosProvider } from "./providers/cinemaos";
 import { framextvProvider } from "./providers/framextv";
 import { vidsrcProvider } from "./providers/vidsrc";
+import { vidfastProvider } from "./providers/vidfast";
 
 const providers: VideoProvider[] = [
     cinemaosProvider,
     framextvProvider,
     vidsrcProvider,
+    vidfastProvider,
 ].sort(
     (a, b) =>
         b.priority - a.priority
@@ -55,9 +57,7 @@ export function selectProvider(
 ): VideoProvider | null {
 
     const candidates =
-        getProviderCandidates(
-            request
-        );
+        getProviderCandidates(request);
 
     return candidates[0] ?? null;
 }
@@ -72,17 +72,13 @@ export function buildPlayerUrl(
 } | null {
 
     const candidates =
-        getProviderCandidates(
-            request
-        );
+        getProviderCandidates(request);
 
     /*
      * User-selected provider gets
      * first attempt.
      */
-    if (
-        preferredProviderId
-    ) {
+    if (preferredProviderId) {
 
         const preferredProvider =
             candidates.find(
@@ -91,9 +87,7 @@ export function buildPlayerUrl(
                     preferredProviderId
             );
 
-        if (
-            preferredProvider
-        ) {
+        if (preferredProvider) {
 
             const url =
                 buildProviderUrl(
@@ -106,7 +100,6 @@ export function buildPlayerUrl(
                 return {
                     provider:
                         preferredProvider,
-
                     url,
                 };
             }
@@ -154,16 +147,12 @@ export function parsePlayerEvent(
         const provider of providers
     ) {
 
-        if (
-            !provider.parseEvent
-        ) {
+        if (!provider.parseEvent) {
             continue;
         }
 
         const parsed =
-            provider.parseEvent(
-                event
-            );
+            provider.parseEvent(event);
 
         if (parsed) {
             return parsed;

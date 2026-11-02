@@ -5,56 +5,44 @@ export type PlayerMediaType =
 export type PlayerProviderId =
     | "cinemaos"
     | "framextv"
-    | "vidsrc";
+    | "vidsrc"
+    | "vidfast";
 
 export type PlayerRequest = {
-    mediaType:
-        PlayerMediaType;
+    mediaType: PlayerMediaType;
 
-    tmdbId?:
-        number | null;
+    tmdbId?: number | null;
 
-    imdbId?:
-        string | null;
+    imdbId?: string | null;
 
-    season?:
-        number | null;
+    season?: number | null;
 
-    episode?:
-        number | null;
+    episode?: number | null;
 
-    startAt?:
-        number | null;
+    startAt?: number | null;
 
-    autoplay?:
-        boolean;
+    autoplay?: boolean;
 
-    autonext?:
-        boolean;
+    autonext?: boolean;
 
-    subtitleLanguage?:
-        string | null;
+    subtitleLanguage?: string | null;
 };
 
 export type PlayerOptions = {
     baseUrl: string;
 
-    providerBaseUrls?:
-        Partial<
-            Record<
-                PlayerProviderId,
-                string
-            >
-        >;
+    providerBaseUrls?: Partial<
+        Record<
+            PlayerProviderId,
+            string
+        >
+    >;
 
-    autoplay?:
-        boolean;
+    autoplay?: boolean;
 
-    autonext?:
-        boolean;
+    autonext?: boolean;
 
-    subtitleLanguage?:
-        string | null;
+    subtitleLanguage?: string | null;
 };
 
 export type PlayerStatus =
@@ -65,43 +53,31 @@ export type PlayerStatus =
     | "timeupdate";
 
 export type PlayerEvent = {
-    provider:
-        PlayerProviderId;
+    provider: PlayerProviderId;
 
-    mediaType:
-        PlayerMediaType;
+    mediaType: PlayerMediaType;
 
-    tmdbId?:
-        number | null;
+    tmdbId?: number | null;
 
-    imdbId?:
-        string | null;
+    imdbId?: string | null;
 
-    season?:
-        number | null;
+    season?: number | null;
 
-    episode?:
-        number | null;
+    episode?: number | null;
 
-    status:
-        PlayerStatus;
+    status: PlayerStatus;
 
-    currentTime:
-        number;
+    currentTime: number;
 
-    duration:
-        number;
+    duration: number;
 };
 
 export interface VideoProvider {
-    id:
-        PlayerProviderId;
+    id: PlayerProviderId;
 
-    name:
-        string;
+    name: string;
 
-    priority:
-        number;
+    priority: number;
 
     supports(
         request: PlayerRequest
