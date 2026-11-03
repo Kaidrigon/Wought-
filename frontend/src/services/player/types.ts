@@ -6,6 +6,7 @@ export type PlayerProviderId =
     | "cinemaos"
     | "framextv"
     | "vidsrc"
+    | "vidnest"
     | "vidfast";
 
 export type PlayerRequest = {

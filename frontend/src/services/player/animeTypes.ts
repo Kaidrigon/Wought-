@@ -2,54 +2,31 @@ export type AnimePlayerLanguage =
     | "sub"
     | "dub";
 
-
 export type AnimePlayerProviderId =
     | "megaplay"
-    | "framextv";
-
+    | "framextv"
+    | "vidnest-anime"
+    | "vidnest-animepahe";
 
 export type AnimePlayerRequest = {
-
-    anilistId:
-        number;
-
-    episode:
-        number;
-
-    season?:
-        number;
-
-    language?:
-        AnimePlayerLanguage;
-
-    startAt?:
-        number | null;
-
-    autoplay?:
-        boolean;
+    anilistId: number;
+    episode: number;
+    season?: number;
+    language?: AnimePlayerLanguage;
+    startAt?: number | null;
+    autoplay?: boolean;
 };
-
 
 export type AnimePlayerOptions = {
+    baseUrl: string;
 
-    baseUrl:
-        string;
+    providerBaseUrls?: Partial<
+        Record<AnimePlayerProviderId, string>
+    >;
 
-    providerBaseUrls?:
-        Partial<
-            Record<
-                AnimePlayerProviderId,
-                string
-            >
-        >;
-
-    language?:
-        AnimePlayerLanguage;
-
-    autoplay?:
-        boolean;
+    language?: AnimePlayerLanguage;
+    autoplay?: boolean;
 };
-
 
 export type AnimePlayerStatus =
     | "playing"
@@ -59,57 +36,30 @@ export type AnimePlayerStatus =
     | "timeupdate"
     | "error";
 
-
 export type AnimePlayerEvent = {
-
-    provider:
-        AnimePlayerProviderId;
-
-    anilistId:
-        number;
-
-    episode:
-        number;
-
-    status:
-        AnimePlayerStatus;
-
-    currentTime:
-        number;
-
-    duration:
-        number;
+    provider: AnimePlayerProviderId;
+    anilistId: number;
+    episode: number;
+    status: AnimePlayerStatus;
+    currentTime: number;
+    duration: number;
 };
 
-
 export interface AnimeVideoProvider {
-
-    id:
-        AnimePlayerProviderId;
-
-    name:
-        string;
-
-    priority:
-        number;
+    id: AnimePlayerProviderId;
+    name: string;
+    priority: number;
 
     supports(
-        request:
-            AnimePlayerRequest
+        request: AnimePlayerRequest
     ): boolean;
 
     buildUrl(
-        request:
-            AnimePlayerRequest,
-
-        options:
-            AnimePlayerOptions
-    ):
-        string | null;
+        request: AnimePlayerRequest,
+        options: AnimePlayerOptions
+    ): string | null;
 
     parseEvent?(
-        event:
-            MessageEvent
-    ):
-        AnimePlayerEvent | null;
+        event: MessageEvent
+    ): AnimePlayerEvent | null;
 }

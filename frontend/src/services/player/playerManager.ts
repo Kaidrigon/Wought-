@@ -8,12 +8,14 @@ import { cinemaosProvider } from "./providers/cinemaos";
 import { framextvProvider } from "./providers/framextv";
 import { vidsrcProvider } from "./providers/vidsrc";
 import { vidfastProvider } from "./providers/vidfast";
+import { vidnestProvider } from "./providers/vidnest";
 
 const providers: VideoProvider[] = [
     cinemaosProvider,
     framextvProvider,
     vidsrcProvider,
     vidfastProvider,
+    vidnestProvider,
 ].sort(
     (a, b) =>
         b.priority - a.priority

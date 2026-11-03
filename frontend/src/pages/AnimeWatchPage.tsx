@@ -47,6 +47,10 @@ const FRAMEXTV_BASE_URL =
     import.meta.env.VITE_ANIME_FRAMEXTV_BASE_URL ||
     "https://framextv.tech";
 
+const VIDNEST_BASE_URL =
+    import.meta.env.VITE_VIDNEST_BASE_URL ||
+    "https://vidnest.fun";
+
 
 /*
  * =================================================
@@ -290,6 +294,11 @@ export default function AnimeWatchPage() {
 
                         framextv:
                             FRAMEXTV_BASE_URL,
+
+                        "vidnest-anime":   
+                            VIDNEST_BASE_URL,
+                        "vidnest-animepahe": 
+                            VIDNEST_BASE_URL,
 
                     },
 
@@ -733,6 +742,33 @@ export default function AnimeWatchPage() {
                         >
                             MegaPlay
                         </button>
+<button
+    type="button"
+    className={
+        selectedProviderId === "vidnest-anime"
+            ? "active"
+            : ""
+    }
+    onClick={() =>
+        changeProvider("vidnest-anime")
+    }
+>
+    VidNest
+</button>
+
+<button
+    type="button"
+    className={
+        selectedProviderId === "vidnest-animepahe"
+            ? "active"
+            : ""
+    }
+    onClick={() =>
+        changeProvider("vidnest-animepahe")
+    }
+>
+    AnimePahe
+</button>
 
                         <button
                             type="button"
