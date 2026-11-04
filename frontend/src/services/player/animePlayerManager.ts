@@ -19,12 +19,16 @@ import {
     vidnestAnimePaheProvider,
 } from "./providers/vidnestAnime";
 
+import {
+    vidlyAnimeProvider,
+} from "./providers/vidlyAnime";
 
 const animeProviders: AnimeVideoProvider[] = [
     megaplayProvider,
     aframextvProvider,
     vidnestAnimeProvider,
     vidnestAnimePaheProvider,
+    vidlyAnimeProvider,
 ].sort(
     (a, b) => b.priority - a.priority
 );

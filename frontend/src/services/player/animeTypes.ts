@@ -6,7 +6,8 @@ export type AnimePlayerProviderId =
     | "megaplay"
     | "framextv"
     | "vidnest-anime"
-    | "vidnest-animepahe";
+    | "vidnest-animepahe"
+    | "vidly-anime";
 
 export type AnimePlayerRequest = {
     anilistId: number;

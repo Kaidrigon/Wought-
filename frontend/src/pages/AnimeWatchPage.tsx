@@ -51,6 +51,9 @@ const VIDNEST_BASE_URL =
     import.meta.env.VITE_VIDNEST_BASE_URL ||
     "https://vidnest.fun";
 
+const VIDLY_BASE_URL =
+    import.meta.env.VITE_VIDLY_BASE_URL ||
+    "https://vidly.fun";
 
 /*
  * =================================================
@@ -299,6 +302,8 @@ export default function AnimeWatchPage() {
                             VIDNEST_BASE_URL,
                         "vidnest-animepahe": 
                             VIDNEST_BASE_URL,
+                        "vidly-anime": 
+                            VIDLY_BASE_URL,
 
                     },
 
@@ -768,6 +773,20 @@ export default function AnimeWatchPage() {
     }
 >
     AnimePahe
+</button>
+
+<button
+    type="button"
+    className={
+        selectedProviderId === "vidly-anime"
+            ? "active"
+            : ""
+    }
+    onClick={() =>
+        changeProvider("vidly-anime")
+    }
+>
+    Vidly
 </button>
 
                         <button

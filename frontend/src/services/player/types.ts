@@ -7,7 +7,8 @@ export type PlayerProviderId =
     | "framextv"
     | "vidsrc"
     | "vidnest"
-    | "vidfast";
+    | "vidfast"
+    | "vidly";
 
 export type PlayerRequest = {
     mediaType: PlayerMediaType;

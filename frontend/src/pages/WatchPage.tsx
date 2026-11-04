@@ -78,6 +78,10 @@ const VIDNEST_BASE_URL =
     import.meta.env.VITE_VIDNEST_BASE_URL ??
     "https://vidnest.fun";
 
+const VIDLY_BASE_URL =
+    import.meta.env.VITE_VIDLY_BASE_URL ??
+    "https://vidly.fun";
+
 /*
  * =================================================
  * WATCH PAGE
@@ -453,6 +457,8 @@ export default function WatchPage() {
                         VIDFAST_BASE_URL,
                     vidnest: 
                         VIDNEST_BASE_URL,
+                    vidly:
+                        VIDLY_BASE_URL,
                 },
 
                 autoplay: true,
@@ -939,6 +945,19 @@ export default function WatchPage() {
 >
     VidNest
 </button>
+
+<button
+    type="button"
+    className={`watch-page__provider-button ${
+        selectedProviderId === "vidly"
+            ? "watch-page__provider-button--active"
+            : ""
+    }`}
+    onClick={() => setSelectedProviderId("vidly")}
+>
+    Vidly
+</button>
+
                         <button
                             type="button"
                             className={`watch-page__provider-button ${
