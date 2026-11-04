@@ -989,24 +989,84 @@
     }
 }
 
-/* Mobile */
+/* =========================================
+   MOBILE W+ ORBITAL DECORATION
+========================================= */
 
 @media (max-width: 700px) {
     .movies-header__decoration {
-        width: 125px;
+        width: 148px;
+        min-width: 148px;
+        margin: 1.5rem auto 0;
+        overflow: visible;
+        transform: none;
+    }
+
+    /* Remove the busy inner orbit */
+    .movies-orbit--inner {
+        display: none;
+    }
+
+    /* One elegant elliptical orbit */
+    .movies-orbit:not(.movies-orbit--inner) {
+        inset: 16% -3%;
+        border: 1px solid rgba(189, 196, 203, 0.28);
+        transform: rotate(-24deg);
+    }
+
+    /* Keep the movement smooth and understated */
+    .movies-orbit__track {
+        animation-duration: 28s;
+    }
+
+    /* Remove the ASCII symbols on mobile */
+    .movies-orbit__symbols {
+        display: none;
+    }
+
+    /* Small satellite */
+    .movies-orbit__satellite {
+        width: 5px;
+        height: 5px;
+        right: -3px;
+        box-shadow:
+            0 0 6px var(--accent),
+            0 0 12px var(--accentGlow);
+    }
+
+    /* Transparent central wordmark */
+    .movies-orbit__core {
+        width: 100%;
+        height: 100%;
     }
 
     .movies-orbit__core span {
-        font-size: 2.6rem;
+        font-size: 2.65rem;
+        letter-spacing: -0.12em;
+        opacity: 0.16;
+    }
+
+    /* Much softer glow */
+    .movies-header__decoration::before {
+        inset: 29%;
+        opacity: 0.045;
+        filter: blur(25px);
+        animation-duration: 8s;
     }
 }
 
-/* Reduced motion accessibility */
+@media (max-width: 700px) {
+    .movies-page {
+        overflow-x: clip;
+    }
 
-@media (prefers-reduced-motion: reduce) {
-    .movies-orbit__track,
-    .movies-header__decoration::before {
-        animation: none;
+    .movies-header {
+        overflow: visible;
+        min-width: 0;
+    }
+
+    .movies-header__decoration {
+        max-width: 100%;
     }
 }
 
