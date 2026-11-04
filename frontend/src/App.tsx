@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 import CorporateOrientation from "./pages/CorporateOrientation";
 import AppContent from "./AppContent";
 
