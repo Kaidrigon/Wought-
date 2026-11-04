@@ -130,7 +130,7 @@ export default function AppContent() {
 
                 <Route
 
-                    path="/cinema/tv-shows"
+                    path="/cinema/tv"
 
                     element={
                         <TVShowsPage />

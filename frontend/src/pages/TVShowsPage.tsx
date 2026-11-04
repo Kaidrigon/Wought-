@@ -373,7 +373,7 @@ export default function TVShowsPage() {
                     <p>
                         Entire seasons of questionable decisions.
                         <br />
-                        Find your next obsession.
+                        Find your next obsession. Because you are so done with your life only lines like this makes you feel good.
                     </p>
                 </motion.div>
 
@@ -558,8 +558,10 @@ export default function TVShowsPage() {
 
                                             {filteredGenres.length === 0 && (
                                                 <div className="movies-genre-empty">
-                                                    No genres found. Try a
-                                                    different search.
+                                                    Man are your hands filled with cum?
+                                                    then are you dyslexic? or are you trying to be jessus
+                                                    coz you have been typing stuff that doesnt even exist retard.
+                                                    
                                                 </div>
                                             )}
                                         </div>
@@ -793,7 +795,7 @@ export default function TVShowsPage() {
                     <div className="movies-results__heading">
                         <div>
                             <span className="movies-results__eyebrow">
-                                YOUR NEXT BINGE
+                                YOUR NEXT EXCUSE TO STAY UP ALL NIGHT because you are one boring unemployed motherfucker.
                             </span>
 
                             <h2>
