@@ -1,11 +1,16 @@
 /*
  * Reuse the established Movies page design.
- * This keeps the two discovery pages visually consistent.
+ * This keeps the two discovery pages visually consistent
+ * (including the W+ orbital ring decoration).
+ *
+ * NOTE: @import must stay at the very top of this file.
  */
 
 @import "./MoviesPage.css";
 
-/* TV-specific filter sizing */
+/* =========================================
+   TV-SPECIFIC FILTER SIZING
+========================================= */
 
 .tv-shows-page .tv-year-filter {
     width: 9.5rem;
@@ -19,19 +24,9 @@
     z-index: 5;
 }
 
-.tv-shows-page .tv-year-filter:has(
-    .movies-sort__trigger.is-open
-) {
-    z-index: 50;
-}
-
-.tv-shows-page .tv-sort-filter:has(
-    .movies-sort__trigger.is-open
-) {
-    z-index: 40;
-}
-
-/* Year dropdown */
+/* =========================================
+   YEAR DROPDOWN
+========================================= */
 
 .tv-shows-page .tv-year-filter__menu {
     left: 0;
@@ -56,7 +51,10 @@
     border-radius: 10px;
 }
 
-/* Keep all dropdowns clickable and above nearby controls */
+/* =========================================
+   STACKING: keep every open dropdown
+   clickable and above nearby controls
+========================================= */
 
 .tv-shows-page .movies-toolbar {
     position: relative;
@@ -69,6 +67,9 @@
     z-index: 1;
     overflow: visible;
 }
+
+/* Whichever dropdown is open sits on top:
+   genre > year > sort */
 
 .tv-shows-page .movies-genre-dropdown:has(
     .movies-filter-button.is-open
@@ -88,7 +89,9 @@
     z-index: 50;
 }
 
-/* Mobile layout */
+/* =========================================
+   MOBILE LAYOUT
+========================================= */
 
 @media (max-width: 600px) {
     .tv-shows-page .movies-toolbar__left {
