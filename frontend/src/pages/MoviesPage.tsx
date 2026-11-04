@@ -1,9 +1,9 @@
-
 import { useEffect, useRef, useState } from "react";
 
 import {
     AnimatePresence,
     motion,
+    useReducedMotion,
 } from "framer-motion";
 
 import {
@@ -83,6 +83,118 @@ const cardVariants = {
     },
 };
 
+/* =========================================
+   W+ ORBITAL DECORATION
+========================================= */
+
+const ORBIT_VIEWBOX = 240;
+const ORBIT_CENTER = ORBIT_VIEWBOX / 2;
+const ORBIT_GLYPHS = ["·", "+", "°", "×", "∘"];
+
+// Builds a closed elliptical path centred in the viewBox.
+// `reverse` flips the travel direction.
+function ellipsePath(rx: number, ry: number, reverse: boolean) {
+    const sweep = reverse ? 0 : 1;
+
+    return [
+        `M ${ORBIT_CENTER - rx} ${ORBIT_CENTER}`,
+        `A ${rx} ${ry} 0 1 ${sweep} ${ORBIT_CENTER + rx} ${ORBIT_CENTER}`,
+        `A ${rx} ${ry} 0 1 ${sweep} ${ORBIT_CENTER - rx} ${ORBIT_CENTER}`,
+    ].join(" ");
+}
+
+type OrbitRingProps = {
+    rx: number;
+    ry: number;
+    tilt: number;
+    count: number;
+    duration: number;
+    reverse?: boolean;
+    satellite?: boolean;
+    inner?: boolean;
+    reduceMotion: boolean;
+};
+
+// One ring of ASCII glyphs travelling along a tilted ellipse.
+// Every glyph gets a negative `begin` so they start evenly
+// spread around the ring and loop seamlessly.
+function OrbitRing({
+    rx,
+    ry,
+    tilt,
+    count,
+    duration,
+    reverse = false,
+    satellite = false,
+    inner = false,
+    reduceMotion,
+}: OrbitRingProps) {
+    const path = ellipsePath(rx, ry, reverse);
+
+    return (
+        <g
+            className={`movies-orbit-ring ${
+                inner ? "movies-orbit-ring--inner" : ""
+            }`}
+            transform={`rotate(${tilt} ${ORBIT_CENTER} ${ORBIT_CENTER})`}
+        >
+            {Array.from({ length: count }, (_, index) => {
+                const glyph =
+                    ORBIT_GLYPHS[index % ORBIT_GLYPHS.length];
+
+                if (reduceMotion) {
+                    const angle = (index / count) * Math.PI * 2;
+
+                    return (
+                        <text
+                            key={index}
+                            className="movies-orbit__glyph"
+                            x={ORBIT_CENTER + rx * Math.cos(angle)}
+                            y={ORBIT_CENTER + ry * Math.sin(angle)}
+                        >
+                            {glyph}
+                        </text>
+                    );
+                }
+
+                return (
+                    <text
+                        key={index}
+                        className="movies-orbit__glyph"
+                    >
+                        {glyph}
+
+                        <animateMotion
+                            dur={`${duration}s`}
+                            begin={`${-(index / count) * duration}s`}
+                            repeatCount="indefinite"
+                            rotate="0"
+                            path={path}
+                        />
+                    </text>
+                );
+            })}
+
+            {satellite && (
+                <circle
+                    className="movies-orbit__satellite"
+                    r={2.6}
+                    cx={reduceMotion ? ORBIT_CENTER + rx : 0}
+                    cy={reduceMotion ? ORBIT_CENTER : 0}
+                >
+                    {!reduceMotion && (
+                        <animateMotion
+                            dur={`${duration}s`}
+                            repeatCount="indefinite"
+                            path={path}
+                        />
+                    )}
+                </circle>
+            )}
+        </g>
+    );
+}
+
 function MovieSkeleton() {
     return (
         <div className="movies-skeleton">
@@ -94,6 +206,8 @@ function MovieSkeleton() {
 }
 
 export default function MoviesPage() {
+    const reduceMotion = useReducedMotion() ?? false;
+
     const [movies, setMovies] = useState<HeroData[]>([]);
 
     const [selectedGenre, setSelectedGenre] =
@@ -339,41 +453,57 @@ export default function MoviesPage() {
                     </p>
                 </motion.div>
 
-                
-{/* Animated W+ orbital decoration */}
-<motion.div
-    className="movies-header__decoration"
-    initial={{ opacity: 0, scale: 0.85 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{
-        duration: 0.8,
-        delay: 0.15,
-    }}
-    aria-hidden="true"
->
-    <div className="movies-orbit">
-        <div className="movies-orbit__track">
-            <span className="movies-orbit__symbols">
-                · + ° × · ∘ + · × ° ·
-            </span>
+                {/* Animated W+ decoration: two ASCII rings orbiting the wordmark */}
+                <motion.div
+                    className="movies-header__decoration"
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                        duration: 0.8,
+                        delay: 0.15,
+                    }}
+                    aria-hidden="true"
+                >
+                    <svg
+                        className="movies-orbit-svg"
+                        viewBox={`0 0 ${ORBIT_VIEWBOX} ${ORBIT_VIEWBOX}`}
+                        xmlns="http://www.w3.org/2000/svg"
+                        focusable="false"
+                    >
+                        {/* W+ wordmark */}
+                        <text
+                            className="movies-orbit__core"
+                            x={ORBIT_CENTER}
+                            y={ORBIT_CENTER}
+                        >
+                            W+
+                        </text>
 
-            <span className="movies-orbit__satellite" />
-        </div>
-    </div>
+                        {/* Outer ring: clockwise, with satellite */}
+                        <OrbitRing
+                            rx={108}
+                            ry={46}
+                            tilt={-28}
+                            count={44}
+                            duration={30}
+                            satellite
+                            reduceMotion={reduceMotion}
+                        />
 
-    <div className="movies-orbit movies-orbit--inner">
-        <div className="movies-orbit__track">
-            <span className="movies-orbit__symbols">
-                + · ∘ ° × · +
-            </span>
-        </div>
-    </div>
-
-    <div className="movies-orbit__core">
-        <span>W+</span>
-    </div>
-</motion.div>
-</header>
+                        {/* Inner ring: counter-clockwise */}
+                        <OrbitRing
+                            rx={82}
+                            ry={30}
+                            tilt={32}
+                            count={30}
+                            duration={22}
+                            reverse
+                            inner
+                            reduceMotion={reduceMotion}
+                        />
+                    </svg>
+                </motion.div>
+            </header>
 
             <section className="movies-discovery">
                 <div className="movies-toolbar">
@@ -520,7 +650,7 @@ export default function MoviesPage() {
 
                                             {filteredGenres.length === 0 && (
                                                 <div className="movies-genre-empty">
-                                                    You know whats better than this? watch Gay porn with your family.
+                                                    No genre matches that. Try a different search.
                                                 </div>
                                             )}
                                         </div>
