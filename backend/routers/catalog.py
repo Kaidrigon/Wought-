@@ -8,6 +8,7 @@ from db import fanart_key
 from routers.common import discover_tmdb, ensure_tmdb_token
 from utils import (
     GENRE_MAP,
+    TV_GENRE_IDS,
     USER_AGENTS,
     clean_html,
     fetch_anilist_json,
@@ -254,9 +255,67 @@ async def search_unified(
     return results
 
 
+
 @router.get("/discover/tv")
-async def discover_tv(page: int = 1):
-    return await discover_tmdb("tv/popular", "tv", page)
+async def discover_tv(
+    page: int = 1,
+    genre_id: int | None = None,
+    sort_by: str = "popularity.desc",
+    year: int | None = None,
+):
+    allowed_sorts = {
+        "popularity.desc",
+        "popularity.asc",
+        "vote_average.desc",
+        "vote_average.asc",
+        "first_air_date.desc",
+        "first_air_date.asc",
+    }
+
+    if page < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Page must be greater than zero."
+        )
+
+    if sort_by not in allowed_sorts:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid sorting option."
+        )
+
+    params = {
+        "page": page,
+        "sort_by": sort_by,
+        "include_adult": False,
+        "include_null_first_air_dates": False,
+    }
+
+    if genre_id is not None:
+        if genre_id not in TV_GENRE_IDS:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid TV genre."
+            )
+
+        params["with_genres"] = genre_id
+
+    if year is not None:
+        if year < 1888 or year > 2100:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid release year."
+            )
+
+        params["first_air_date_year"] = year
+
+    return await discover_tmdb(
+        "discover/tv",
+        "tv",
+        page,
+        extra_params=params,
+    )
+
 
 
 @router.get("/discover/movies")

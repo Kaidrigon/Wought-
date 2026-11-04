@@ -1,0 +1,113 @@
+/*
+ * Reuse the established Movies page design.
+ * This keeps the two discovery pages visually consistent.
+ */
+
+@import "./MoviesPage.css";
+
+/* TV-specific filter sizing */
+
+.tv-shows-page .tv-year-filter {
+    width: 9.5rem;
+    flex: 0 0 9.5rem;
+    z-index: 5;
+}
+
+.tv-shows-page .tv-sort-filter {
+    width: 12.5rem;
+    flex: 0 0 12.5rem;
+    z-index: 5;
+}
+
+.tv-shows-page .tv-year-filter:has(
+    .movies-sort__trigger.is-open
+) {
+    z-index: 50;
+}
+
+.tv-shows-page .tv-sort-filter:has(
+    .movies-sort__trigger.is-open
+) {
+    z-index: 40;
+}
+
+/* Year dropdown */
+
+.tv-shows-page .tv-year-filter__menu {
+    left: 0;
+    right: auto;
+    min-width: 100%;
+    width: 100%;
+}
+
+.tv-shows-page .tv-year-filter__list {
+    max-height: 15rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #444 transparent;
+}
+
+.tv-shows-page .tv-year-filter__list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.tv-shows-page .tv-year-filter__list::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+/* Keep all dropdowns clickable and above nearby controls */
+
+.tv-shows-page .movies-toolbar {
+    position: relative;
+    z-index: 10;
+    overflow: visible;
+}
+
+.tv-shows-page .movies-toolbar__left {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+}
+
+.tv-shows-page .movies-genre-dropdown:has(
+    .movies-filter-button.is-open
+) {
+    z-index: 60;
+}
+
+.tv-shows-page .tv-year-filter:has(
+    .movies-sort__trigger.is-open
+) {
+    z-index: 55;
+}
+
+.tv-shows-page .tv-sort-filter:has(
+    .movies-sort__trigger.is-open
+) {
+    z-index: 50;
+}
+
+/* Mobile layout */
+
+@media (max-width: 600px) {
+    .tv-shows-page .movies-toolbar__left {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tv-shows-page .movies-genre-dropdown {
+        grid-column: 1 / -1;
+    }
+
+    .tv-shows-page .tv-year-filter,
+    .tv-shows-page .tv-sort-filter {
+        width: 100%;
+        min-width: 0;
+        flex: initial;
+    }
+
+    .tv-shows-page .tv-year-filter__menu {
+        width: 100%;
+        min-width: 0;
+    }
+}
