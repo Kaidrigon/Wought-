@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-
+import { Analytics } from '@vercel/analytics/next';
 import CorporateOrientation from "./pages/CorporateOrientation";
 import AppContent from "./AppContent";
 
@@ -26,6 +26,7 @@ export default function App() {
             ) : (
                 <AppContent />
             )}
+                <Analytics />
         </>
     );
 }
