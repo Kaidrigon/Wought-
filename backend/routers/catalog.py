@@ -20,6 +20,7 @@ from utils import (
     get_tmdb_logo,
     parse_anilist_media_type,
     proxy_image_url,
+    format_anilist_item,
 )
 
 router = APIRouter()
@@ -380,37 +381,117 @@ async def discover_movies(
     )
 
 
+
 @router.get("/discover/anime")
-async def discover_anime(page: int = 1):
+async def discover_anime(
+    page: int = 1,
+    category: str = "movie",
+    genre: str | None = None,
+    sort_by: str = "popularity",
+):
+    formats = {
+        "movie": ["MOVIE"],
+        "tv": ["TV", "TV_SHORT", "ONA", "OVA", "SPECIAL"],
+    }
+
+    selected_formats = formats.get(category.lower())
+
+    if not selected_formats:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid anime category. Use 'movie' or 'tv'.",
+        )
+
+    if page < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Page must be at least 1.",
+        )
+
+    sort_options = {
+        "popularity": "POPULARITY_DESC",
+        "score": "SCORE_DESC",
+        "trending": "TRENDING_DESC",
+        "newest": "START_DATE_DESC",
+        "oldest": "START_DATE",
+    }
+
+    selected_sort = sort_options.get(sort_by.lower())
+
+    if not selected_sort:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid sort option.",
+        )
+
     query = """
-    query ($page: Int) {
+    query (
+        $page: Int,
+        $formats: [MediaFormat],
+        $genres: [String],
+        $sort: [MediaSort]
+    ) {
         Page(page: $page, perPage: 20) {
-            media(type: ANIME, sort: POPULARITY_DESC) {
+            pageInfo {
+                total
+                currentPage
+                lastPage
+                hasNextPage
+            }
+
+            media(
+                type: ANIME,
+                format_in: $formats,
+                genre_in: $genres,
+                sort: $sort
+            ) {
                 id
-                title { english romaji }
+                title {
+                    english
+                    romaji
+                }
                 description
-                coverImage { large }
+                coverImage {
+                    large
+                }
                 format
                 genres
-                startDate { year }
+                startDate {
+                    year
+                }
             }
         }
     }
     """
-    data = await fetch_anilist_json(query, {"page": page})
-    media_list = data.get("data", {}).get("Page", {}).get("media", [])
-    return [
+
+    data = await fetch_anilist_json(
+        query,
         {
-            "anilist_id": item.get("id"),
-            "media_type": parse_anilist_media_type(item.get("format", "")),
-            "title": get_anilist_title(item),
-            "release_date": str(item.get("startDate", {}).get("year") or "Unknown"),
-            "description": clean_html(item.get("description", "")),
-            "poster_link": item.get("coverImage", {}).get("large"),
-            "genres": item.get("genres", []),
-        }
-        for item in media_list
-    ]
+            "page": page,
+            "formats": selected_formats,
+            "genres": [genre] if genre else None,
+            "sort": [selected_sort],
+        },
+    )
+
+    page_data = (
+        data.get("data", {})
+        .get("Page", {})
+    )
+
+    media_list = page_data.get("media", [])
+    page_info = page_data.get("pageInfo", {})
+
+    return {
+        "results": [
+            format_anilist_item(item)
+            for item in media_list
+        ],
+        "current_page": page_info.get("currentPage", page),
+        "total_pages": page_info.get("lastPage", 1),
+        "total_results": page_info.get("total", 0),
+        "has_next_page": page_info.get("hasNextPage", False),
+    }
 
 
 @router.get("/trending")

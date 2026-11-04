@@ -35,6 +35,9 @@ import AnimePage
 import MoviesPage
     from "./pages/MoviesPage";
 
+import AnimeMoviesPage
+    from "./pages/AnimeMoviesPage";
+
 import TVShowsPage
     from "./pages/TVShowsPage";
 
@@ -118,7 +121,7 @@ export default function AppContent() {
                     path="/anime/movies"
 
                     element={
-                        <MoviesPage />
+                        <AnimeMoviesPage />
                     }
 
                 />
