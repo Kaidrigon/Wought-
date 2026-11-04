@@ -253,7 +253,7 @@ export default function AppContent() {
 
                 <Route
 
-                    path="/anime/anime/:id"
+                    path="/anime/:id"
 
                     element={
                         <DetailPage />
