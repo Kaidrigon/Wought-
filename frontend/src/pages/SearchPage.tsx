@@ -53,7 +53,9 @@ export default function SearchPage() {
 
     const { section } = useTheme();
 
-    const isAnime = section === "anime";
+    const isAnime =
+    section === "anime" ||
+    location.pathname.startsWith("/anime/");
 
     const [query, setQuery] = useState("");
 

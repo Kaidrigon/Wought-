@@ -71,7 +71,9 @@ export default function RecommendationSection({
 
     const { section } = useTheme();
 
-    const isAnime = section === "anime";
+    const isAnime =
+    section === "anime" ||
+    location.pathname.startsWith("/anime/");
 
     const [recommendations, setRecommendations] =
         useState<RecommendationItem[]>([]);

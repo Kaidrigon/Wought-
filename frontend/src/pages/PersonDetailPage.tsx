@@ -44,7 +44,8 @@ export default function PersonPage() {
         useState("");
 
     const isAnime =
-        section === "anime";
+    section === "anime" ||
+    location.pathname.startsWith("/anime/");
 
     useEffect(() => {
 

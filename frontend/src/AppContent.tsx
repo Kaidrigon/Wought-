@@ -122,6 +122,7 @@ export default function AppContent() {
                     path="/anime/movie/:id"
                     element={<DetailPage />}
                 />
+                <Route path="/anime/tv/:id" element={<DetailPage />} />
 
                 {/* WATCH — CINEMA */}
                 <Route

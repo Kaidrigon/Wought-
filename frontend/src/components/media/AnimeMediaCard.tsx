@@ -14,7 +14,10 @@ export default function AnimeMediaCard({
     anime,
     index = 0,
 }: AnimeMediaCardProps) {
-    const detailPath = `/anime/movie/${anime.anilist_id}`;
+    const detailPath =
+        anime.media_type === "movie"
+            ? `/anime/movie/${anime.anilist_id}`
+            : `/anime/tv/${anime.anilist_id}`;
 
     return (
         <motion.div

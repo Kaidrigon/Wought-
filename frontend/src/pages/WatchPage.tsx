@@ -118,7 +118,8 @@ export default function WatchPage() {
      */
 
     const isAnime =
-        section === "anime";
+    section === "anime" ||
+    location.pathname.startsWith("/anime/");
 
     const isEpisodePage =
         tv_id != null &&
@@ -127,11 +128,8 @@ export default function WatchPage() {
 
     const isTV =
         !isAnime &&
-        (
-            isEpisodePage ||
-            location.pathname.includes("/tv/")
-        );
-
+        (isEpisodePage ||
+        location.pathname.includes("/tv/"));
     const mediaType: PlayerMediaType =
         isTV
             ? "tv"

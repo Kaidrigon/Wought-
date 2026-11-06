@@ -36,18 +36,17 @@ export default function DetailPage() {
 
     const { section } = useTheme();
 
-    const isAnime = section === "anime";
+    const isAnime =
+    section === "anime" ||
+    location.pathname.startsWith("/anime/");
 
     const isSeasonPage = Boolean(
         tvId && seasonNumber
     );
 
     const isTV =
-        !isAnime &&
-        (
-            location.pathname.includes("/tv/") ||
-            isSeasonPage
-        );
+    location.pathname.includes("/tv/") ||
+    isSeasonPage;
 
     const [data, setData] =
         useState<DetailsData | null>(null);

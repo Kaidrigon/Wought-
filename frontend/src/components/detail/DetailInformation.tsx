@@ -68,6 +68,12 @@ return (
                     value={studios.join(", ")}
                 />
             )}
+            {isAnime && isTV && data.format && (
+    <InfoItem
+        label="Format"
+        value={data.format}
+    />
+)}
 
             {isAnime && data.episodes != null && (
                 <InfoItem
