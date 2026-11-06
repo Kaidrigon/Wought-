@@ -1,0 +1,7 @@
+/* =========================================================
+   TV SHOWS PAGE OVERRIDES
+========================================================= */
+
+.anime-tv-shows .anime-movies__hero h1::after {
+    content: "ANIME / SERIES";
+}

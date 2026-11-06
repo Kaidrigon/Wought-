@@ -4,358 +4,165 @@ import {
     Navigate,
 } from "react-router-dom";
 
+import SearchPage from "./pages/SearchPage";
+import DetailPage from "./pages/DetailPage";
+import SeasonPage from "./pages/SeasonPage";
+import PersonDetailPage from "./pages/PersonDetailPage";
+import WatchPage from "./pages/WatchPage";
+import AnimeWatchPage from "./pages/AnimeWatchPage";
 
-import SearchPage
-    from "./pages/SearchPage";
+import AppLayout from "./components/layout/AppLayout/AppLayout";
 
-import DetailPage
-    from "./pages/DetailPage";
+import CinemaPage from "./pages/CinemaPage";
+import AnimePage from "./pages/AnimePage";
 
-import SeasonPage
-    from "./pages/SeasonPage";
+import MoviesPage from "./pages/MoviesPage";
+import AnimeMoviesPage from "./pages/AnimeMoviesPage";
 
-import PersonDetailPage
-    from "./pages/PersonDetailPage";
+import TVShowsPage from "./pages/TVShowsPage";
+import AnimeTVShowsPage from "./pages/AnimeTVShowsPage";
 
-import WatchPage
-    from "./pages/WatchPage";
-
-import AnimeWatchPage
-    from "./pages/AnimeWatchPage";
-
-import AppLayout
-    from "./components/layout/AppLayout/AppLayout";
-
-import CinemaPage
-    from "./pages/CinemaPage";
-
-import AnimePage
-    from "./pages/AnimePage";
-
-import MoviesPage
-    from "./pages/MoviesPage";
-
-import AnimeMoviesPage
-    from "./pages/AnimeMoviesPage";
-
-import TVShowsPage
-    from "./pages/TVShowsPage";
-
-import MyListPage
-    from "./pages/MyListPage";
-
-import SettingsPage
-    from "./pages/SettingsPage";
-
+import MyListPage from "./pages/MyListPage";
+import SettingsPage from "./pages/SettingsPage";
 
 export default function AppContent() {
-
     return (
-
         <AppLayout>
-
             <Routes>
 
-
-                {/* ================================
-                    ROOT
-                ================================= */}
-
+                {/* ROOT */}
                 <Route
-
                     path="/"
-
                     element={
-
                         <Navigate
                             to="/cinema"
                             replace
                         />
-
                     }
-
                 />
 
-
-                {/* ================================
-                    HOME
-                ================================= */}
-
+                {/* HOME */}
                 <Route
-
                     path="/cinema"
-
-                    element={
-                        <CinemaPage />
-                    }
-
+                    element={<CinemaPage />}
                 />
 
                 <Route
-
                     path="/anime"
-
-                    element={
-                        <AnimePage />
-                    }
-
+                    element={<AnimePage />}
                 />
 
-
-                {/* ================================
-                    MOVIES
-                ================================= */}
-
+                {/* MOVIES */}
                 <Route
-
                     path="/cinema/movies"
-
-                    element={
-                        <MoviesPage />
-                    }
-
+                    element={<MoviesPage />}
                 />
 
                 <Route
-
                     path="/anime/movies"
-
-                    element={
-                        <AnimeMoviesPage />
-                    }
-
+                    element={<AnimeMoviesPage />}
                 />
 
-
-                {/* ================================
-                    TV
-                ================================= */}
-
+                {/* TV */}
                 <Route
-
                     path="/cinema/tv"
-
-                    element={
-                        <TVShowsPage />
-                    }
-
+                    element={<TVShowsPage />}
                 />
 
                 <Route
-
-                    path="/anime/tv-shows"
-
-                    element={
-                        <TVShowsPage />
-                    }
-
+                    path="/anime/tv"
+                    element={<AnimeTVShowsPage />}
                 />
 
-
-                {/* ================================
-                    MY LIST
-                ================================= */}
-
+                {/* MY LIST */}
                 <Route
-
                     path="/cinema/my-list"
-
-                    element={
-                        <MyListPage />
-                    }
-
+                    element={<MyListPage />}
                 />
 
                 <Route
-
                     path="/anime/my-list"
-
-                    element={
-                        <MyListPage />
-                    }
-
+                    element={<MyListPage />}
                 />
 
-
-                {/* ================================
-                    SETTINGS
-                ================================= */}
-
+                {/* SETTINGS */}
                 <Route
-
                     path="/cinema/settings"
-
-                    element={
-                        <SettingsPage />
-                    }
-
+                    element={<SettingsPage />}
                 />
 
                 <Route
-
                     path="/anime/settings"
-
-                    element={
-                        <SettingsPage />
-                    }
-
+                    element={<SettingsPage />}
                 />
 
-
-                {/* ================================
-                    SEARCH
-                ================================= */}
-
+                {/* SEARCH */}
                 <Route
-
                     path="/cinema/search"
-
-                    element={
-                        <SearchPage />
-                    }
-
+                    element={<SearchPage />}
                 />
 
                 <Route
-
                     path="/anime/search"
-
-                    element={
-                        <SearchPage />
-                    }
-
+                    element={<SearchPage />}
                 />
 
-
-                {/* ================================
-                    DETAIL PAGES
-                ================================= */}
-
+                {/* DETAIL PAGES */}
                 <Route
-
                     path="/cinema/movie/:id"
-
-                    element={
-                        <DetailPage />
-                    }
-
+                    element={<DetailPage />}
                 />
 
                 <Route
-
                     path="/cinema/tv/:id"
-
-                    element={
-                        <DetailPage />
-                    }
-
+                    element={<DetailPage />}
                 />
 
                 <Route
-
                     path="/anime/movie/:id"
-
-                    element={
-                        <DetailPage />
-                    }
-
+                    element={<DetailPage />}
                 />
 
-
-                {/* ================================
-                    WATCH — CINEMA
-                ================================= */}
-
+                {/* WATCH — CINEMA */}
                 <Route
-
                     path="/cinema/movie/:id/watch"
-
-                    element={
-                        <WatchPage />
-                    }
-
+                    element={<WatchPage />}
                 />
 
                 <Route
-
                     path="/cinema/tv/:id/watch"
-
-                    element={
-                        <WatchPage />
-                    }
-
+                    element={<WatchPage />}
                 />
 
                 <Route
-
                     path="/cinema/tv/:tv_id/season/:season_number/episode/:episode_number/watch"
-
-                    element={
-                        <WatchPage />
-                    }
-
+                    element={<WatchPage />}
                 />
 
-
-                {/* ================================
-                    WATCH — ANIME
-                ================================= */}
-
+                {/* WATCH — ANIME */}
                 <Route
-
                     path="/anime/anime/:id/watch"
-
-                    element={
-                        <AnimeWatchPage />
-                    }
-
+                    element={<AnimeWatchPage />}
                 />
 
-
-                {/* ================================
-                    PERSON DETAILS
-                ================================= */}
-
+                {/* PERSON DETAILS */}
                 <Route
-
                     path="/cinema/person/:id"
-
-                    element={
-                        <PersonDetailPage />
-                    }
-
+                    element={<PersonDetailPage />}
                 />
 
                 <Route
-
                     path="/anime/person/:id"
-
-                    element={
-                        <PersonDetailPage />
-                    }
-
+                    element={<PersonDetailPage />}
                 />
 
-
-                {/* ================================
-                    TV SEASON
-                ================================= */}
-
+                {/* TV SEASON */}
                 <Route
-
                     path="/cinema/tv/:tv_id/season/:season_number"
-
-                    element={
-                        <SeasonPage />
-                    }
-
+                    element={<SeasonPage />}
                 />
-
 
             </Routes>
-
         </AppLayout>
-
     );
-
 }
