@@ -1,3 +1,4 @@
+
 export type AnimeCategory = "movie" | "tv";
 
 export type AnimeSortOption =
@@ -14,6 +15,7 @@ export interface AnimeData {
     release_date: string;
     description: string;
     poster_link: string | null;
+    backdrop_link: string | null;
     genres: string[];
 }
 

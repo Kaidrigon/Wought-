@@ -698,26 +698,39 @@ async def trending_anime(page: int = 1):
         Page(page: $page, perPage: 20) {
             media(type: ANIME, sort: TRENDING_DESC) {
                 id
-                title { english romaji }
+                title {
+                    english
+                    romaji
+                }
                 description
-                coverImage { large }
+                coverImage {
+                    large
+                }
+                bannerImage
                 format
                 genres
-                startDate { year }
+                startDate {
+                    year
+                }
             }
         }
     }
     """
+
     data = await fetch_anilist_json(query, {"page": page})
     media_list = data.get("data", {}).get("Page", {}).get("media", [])
+
     return [
         {
             "anilist_id": item.get("id"),
             "media_type": parse_anilist_media_type(item.get("format", "")),
             "title": get_anilist_title(item),
-            "release_date": str(item.get("startDate", {}).get("year") or "Unknown"),
+            "release_date": str(
+                item.get("startDate", {}).get("year") or "Unknown"
+            ),
             "description": clean_html(item.get("description", "")),
             "poster_link": item.get("coverImage", {}).get("large"),
+            "backdrop_link": item.get("bannerImage"),
             "genres": item.get("genres", []),
         }
         for item in media_list
