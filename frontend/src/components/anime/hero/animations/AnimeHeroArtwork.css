@@ -1,0 +1,276 @@
+
+.anime-artwork {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #050505;
+    isolation: isolate;
+}
+
+.anime-artwork__slide {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    will-change: transform, opacity, filter;
+}
+
+.anime-artwork__backdrop,
+.anime-artwork__poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    user-select: none;
+}
+
+.anime-artwork__poster {
+    display: none;
+}
+
+.anime-artwork__image-flare {
+    position: absolute;
+    z-index: 2;
+    top: -20%;
+    bottom: -20%;
+    left: 0;
+    width: 25%;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(89, 231, 203, 0.2),
+        rgba(255, 255, 255, 0.12),
+        transparent
+    );
+    filter: blur(22px);
+    transform: skewX(-18deg);
+}
+
+.anime-artwork__shade {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            90deg,
+            rgba(5, 5, 5, 0.97) 0%,
+            rgba(5, 5, 5, 0.83) 25%,
+            rgba(5, 5, 5, 0.36) 57%,
+            rgba(5, 5, 5, 0.08) 100%
+        ),
+        linear-gradient(
+            0deg,
+            #050505 0%,
+            rgba(5, 5, 5, 0.52) 13%,
+            transparent 55%
+        );
+}
+
+.anime-artwork__vignette {
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 180px rgba(0, 0, 0, 0.42);
+}
+
+.anime-artwork__grain {
+    position: absolute;
+    z-index: 5;
+    inset: -50%;
+    pointer-events: none;
+    opacity: 0.075;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    animation: anime-grain-drift 0.22s steps(2) infinite;
+}
+
+.anime-artwork__scanlines {
+    position: absolute;
+    z-index: 5;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.11;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,
+        rgba(0, 0, 0, 0.35) 4px
+    );
+}
+
+.anime-artwork__coordinates {
+    position: absolute;
+    z-index: 6;
+    top: 2rem;
+    right: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.45rem;
+    color: rgba(245, 245, 245, 0.48);
+    font-size: 0.53rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    pointer-events: none;
+}
+
+.anime-artwork__coordinates span:first-child {
+    color: #59e7cb;
+}
+
+.anime-artwork__crosshair {
+    position: absolute;
+    z-index: 6;
+    top: 50%;
+    right: 4.5%;
+    width: 34px;
+    height: 34px;
+    opacity: 0.65;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.anime-artwork__crosshair span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: #59e7cb;
+    transform: translate(-50%, -50%);
+}
+
+.anime-artwork__crosshair span:first-child {
+    width: 1px;
+    height: 100%;
+}
+
+.anime-artwork__crosshair span:last-child {
+    width: 100%;
+    height: 1px;
+}
+
+@keyframes anime-grain-drift {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(2%, -1%);
+    }
+
+    50% {
+        transform: translate(-1%, 2%);
+    }
+
+    75% {
+        transform: translate(1%, 1%);
+    }
+
+    100% {
+        transform: translate(-2%, -1%);
+    }
+}
+
+@media (max-width: 768px) {
+    .anime-artwork__backdrop {
+        display: none;
+    }
+
+    .anime-artwork__poster {
+        display: block;
+        object-position: center 20%;
+    }
+
+    .anime-artwork__shade {
+        background:
+            linear-gradient(
+                0deg,
+                #050505 0%,
+                rgba(5, 5, 5, 0.94) 22%,
+                rgba(5, 5, 5, 0.32) 65%,
+                rgba(5, 5, 5, 0.16) 100%
+            );
+    }
+
+    .anime-artwork__coordinates {
+        top: 1.5rem;
+        right: 1.25rem;
+        font-size: 0.45rem;
+    }
+
+    .anime-artwork__crosshair {
+        top: 42%;
+        right: 1.5rem;
+        width: 24px;
+        height: 24px;
+    }
+
+    .anime-artwork__vignette {
+        box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.32);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anime-artwork__grain {
+        animation: none;
+    }
+}
+
+/* =========================================
+   ANIME TRANSITION CANVAS
+========================================= */
+
+.anime-transition-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+    background: #050505;
+    isolation: isolate;
+}
+
+.anime-transition-canvas canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Keep the artwork effects above the Pixi canvas */
+
+.anime-artwork__grain,
+.anime-artwork__scanlines,
+.anime-artwork__vignette,
+.anime-artwork__shade,
+.anime-artwork__coordinates,
+.anime-artwork__crosshair {
+    pointer-events: none;
+}
+
+.anime-artwork__grain,
+.anime-artwork__scanlines,
+.anime-artwork__vignette,
+.anime-artwork__shade {
+    z-index: 1;
+}
+
+.anime-artwork__coordinates,
+.anime-artwork__crosshair {
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .anime-transition-canvas {
+        transform: translateZ(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anime-transition-canvas {
+        transition: none;
+    }
+}

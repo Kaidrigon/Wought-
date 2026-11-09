@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 import random
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, Response
 
@@ -87,6 +88,76 @@ async def proxy_image(
         ),
     )
 
+@router.get("/proxy-anime-image")
+async def proxy_anime_image(url: str):
+    parsed_url = urlparse(url)
+
+    # Only allow images hosted by AniList.
+    hostname = parsed_url.hostname or ""
+
+    if (
+        parsed_url.scheme != "https"
+        or not (
+            hostname == "anilist.co"
+            or hostname.endswith(".anilist.co")
+        )
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid AniList image URL.",
+        )
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=20,
+            follow_redirects=True,
+            headers={
+                "User-Agent": "Mozilla/5.0",
+                "Referer": "https://anilist.co/",
+            },
+        ) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+
+            # Validate the final destination after redirects too.
+            final_host = urlparse(str(response.url)).hostname or ""
+
+            if not (
+                final_host == "anilist.co"
+                or final_host.endswith(".anilist.co")
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid image redirect.",
+                )
+
+            content_type = response.headers.get(
+                "content-type",
+                ""
+            )
+
+            if not content_type.startswith("image/"):
+                raise HTTPException(
+                    status_code=415,
+                    detail="The requested resource is not an image.",
+                )
+
+            return Response(
+                content=response.content,
+                media_type=content_type,
+                headers={
+                    "Cache-Control": "public, max-age=86400",
+                },
+            )
+
+    except HTTPException:
+        raise
+
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=502,
+            detail="Could not retrieve AniList image.",
+        )
 
 @router.get("/search/anime")
 async def search_anime(

@@ -1,15 +1,9 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-    ArrowRight,
-    ChevronLeft,
-    ChevronRight,
-    Play,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import useAnimeTrending from "../hooks/anime/useAnimeTrending";
+import AnimeHero from "../components/anime/hero/AnimeHero";
 
 import "./AnimePage.css";
 
@@ -21,7 +15,12 @@ export default function AnimePage() {
         (item) => item.backdrop_link || item.poster_link
     );
 
-    const activeAnime = featuredAnime[activeIndex];
+    const safeIndex =
+        featuredAnime.length > 0
+            ? activeIndex % featuredAnime.length
+            : 0;
+
+    const activeAnime = featuredAnime[safeIndex];
 
     const previousAnime = () => {
         setActiveIndex((current) =>
@@ -54,8 +53,10 @@ export default function AnimePage() {
                     <span className="anime-home__eyebrow">
                         ANIMATION DIVISION / CONNECTION ERROR
                     </span>
+
                     <h1>Something interrupted the signal.</h1>
                     <p>{error}</p>
+
                     <button
                         className="anime-home__retry"
                         onClick={() => window.location.reload()}
@@ -74,6 +75,7 @@ export default function AnimePage() {
                     <span className="anime-home__eyebrow">
                         ANIMATION DIVISION
                     </span>
+
                     <h1>No transmissions found.</h1>
                     <p>There is currently nothing to display.</p>
                 </div>
@@ -83,139 +85,13 @@ export default function AnimePage() {
 
     return (
         <main className="anime-home">
-            <section className="anime-hero">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={activeAnime.anilist_id}
-                        className="anime-hero__slide"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.45 }}
-                    >
-                        {activeAnime.backdrop_link && (
-                            <img
-                                className="anime-hero__backdrop"
-                                src={activeAnime.backdrop_link}
-                                alt=""
-                            />
-                        )}
-
-                        {activeAnime.poster_link && (
-                            <img
-                                className="anime-hero__poster"
-                                src={activeAnime.poster_link}
-                                alt=""
-                            />
-                        )}
-
-                        <div className="anime-hero__shade" />
-
-                        <div className="anime-hero__content">
-                            <div className="anime-hero__identity">
-                                <span className="anime-hero__eyebrow">
-                                    <span className="anime-hero__status-dot" />
-                                    W+ / ANIMATION DIVISION
-                                </span>
-
-                                <span className="anime-hero__classification">
-                                    FEATURED TRANSMISSION
-                                </span>
-                            </div>
-
-                            <div className="anime-hero__information">
-                                <span className="anime-hero__index">
-                                    ANIME SIGNAL /{" "}
-                                    {String(activeIndex + 1).padStart(2, "0")}
-                                </span>
-
-                                <h1>{activeAnime.title}</h1>
-
-                                <div className="anime-hero__metadata">
-                                    <span>{activeAnime.release_date}</span>
-                                    <span className="anime-hero__metadata-dot" />
-                                    <span>
-                                        {activeAnime.media_type === "movie"
-                                            ? "FILM"
-                                            : "SERIES"}
-                                    </span>
-
-                                    {activeAnime.genres.slice(0, 3).map(
-                                        (genre) => (
-                                            <span
-                                                className="anime-hero__genre"
-                                                key={genre}
-                                            >
-                                                {genre}
-                                            </span>
-                                        )
-                                    )}
-                                </div>
-
-                                <p className="anime-hero__description">
-                                    {activeAnime.description ||
-                                        "No description available for this transmission."}
-                                </p>
-
-                                <div className="anime-hero__actions">
-                                    <Link
-                                        to={`/anime/anime/${activeAnime.anilist_id}/watch`}
-                                        className="anime-hero__play"
-                                    >
-                                        <Play size={17} fill="currentColor" />
-                                        <span>PLAY NOW</span>
-                                    </Link>
-
-                                    <Link
-                                        to={`/anime/${activeAnime.media_type}/${activeAnime.anilist_id}`}
-                                        className="anime-hero__details"
-                                    >
-                                        DOSSIER
-                                        <ArrowRight size={16} />
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-
-                {featuredAnime.length > 1 && (
-                    <div className="anime-hero__navigation">
-                        <div className="anime-hero__counter">
-                            <span>
-                                {String(activeIndex + 1).padStart(2, "0")}
-                            </span>
-                            <span className="anime-hero__counter-divider" />
-                            <span>
-                                {String(featuredAnime.length).padStart(2, "0")}
-                            </span>
-                        </div>
-
-                        <div className="anime-hero__nav-buttons">
-                            <button
-                                type="button"
-                                onClick={previousAnime}
-                                aria-label="Previous anime"
-                            >
-                                <ChevronLeft size={20} />
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={nextAnime}
-                                aria-label="Next anime"
-                            >
-                                <ChevronRight size={20} />
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                <div className="anime-hero__bottom-line">
-                    <span>Wought+ ORIGINAL SIGNAL</span>
-                    <span>ANIMATION / 001</span>
-                </div>
-            </section>
+            <AnimeHero
+                anime={activeAnime}
+                activeIndex={safeIndex}
+                total={featuredAnime.length}
+                onPrevious={previousAnime}
+                onNext={nextAnime}
+            />
         </main>
     );
 }

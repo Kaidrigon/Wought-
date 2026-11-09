@@ -1,0 +1,174 @@
+
+.anime-title {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    perspective: 900px;
+}
+
+.anime-title__serial {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.15rem;
+    color: rgba(245, 245, 245, 0.58);
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+}
+
+.anime-title__serial-mark {
+    color: #59e7cb;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+}
+
+.anime-title__serial-line {
+    width: 36px;
+    height: 1px;
+    background: #59e7cb;
+}
+
+.anime-title__lockup {
+    position: relative;
+    isolation: isolate;
+}
+
+.anime-title__heading {
+    position: relative;
+    z-index: 2;
+    max-width: 850px;
+    margin: 0;
+    color: #f5f5f5;
+    font-family:
+        "Arial Narrow",
+        "Roboto Condensed",
+        "Helvetica Neue",
+        sans-serif;
+    font-size: clamp(3.3rem, 7.1vw, 7.2rem);
+    font-stretch: condensed;
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.075em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+    transform: skewX(-5deg);
+    text-shadow:
+        3px 3px 0 rgba(89, 231, 203, 0.13),
+        -2px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.anime-title__character {
+    display: inline-block;
+    transform-origin: 50% 100%;
+    will-change: transform, opacity;
+}
+
+.anime-title__character--space {
+    width: 0.24em;
+}
+
+.anime-title__ghost {
+    position: absolute;
+    z-index: 1;
+    top: 0.055em;
+    left: 0.045em;
+    max-width: 100%;
+    color: transparent;
+    font-family:
+        "Arial Narrow",
+        "Roboto Condensed",
+        "Helvetica Neue",
+        sans-serif;
+    font-size: clamp(3.3rem, 7.1vw, 7.2rem);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: -0.075em;
+    text-transform: uppercase;
+    -webkit-text-stroke: 1px rgba(89, 231, 203, 0.65);
+    opacity: 0.65;
+    overflow-wrap: anywhere;
+    transform: skewX(-5deg);
+    pointer-events: none;
+}
+
+.anime-title__side-mark {
+    position: absolute;
+    z-index: 3;
+    top: -0.5em;
+    right: -1.2em;
+    color: #59e7cb;
+    font-family: serif;
+    font-size: clamp(1.3rem, 2.5vw, 2.4rem);
+    font-weight: 400;
+    writing-mode: vertical-rl;
+    letter-spacing: 0.18em;
+    opacity: 0.85;
+    text-shadow: 0 0 22px rgba(89, 231, 203, 0.3);
+}
+
+.anime-title__underline {
+    position: relative;
+    width: 72%;
+    height: 2px;
+    margin-top: 1.35rem;
+    background: linear-gradient(
+        90deg,
+        #59e7cb,
+        rgba(89, 231, 203, 0.25),
+        transparent
+    );
+    transform-origin: left;
+}
+
+.anime-title__underline::after {
+    content: "";
+    position: absolute;
+    top: -3px;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    border: 1px solid #59e7cb;
+    transform: rotate(45deg);
+}
+
+@media (max-width: 768px) {
+    .anime-title__serial {
+        margin-bottom: 0.9rem;
+        font-size: 0.52rem;
+    }
+
+    .anime-title__heading,
+    .anime-title__ghost {
+        font-size: clamp(2.8rem, 12vw, 5rem);
+        line-height: 0.91;
+    }
+
+    .anime-title__side-mark {
+        top: -0.4em;
+        right: -0.85em;
+        font-size: 1.2rem;
+    }
+
+    .anime-title__underline {
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .anime-title__heading,
+    .anime-title__ghost {
+        font-size: 2.65rem;
+    }
+
+    .anime-title__side-mark {
+        right: -0.7em;
+        font-size: 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anime-title__character {
+        will-change: auto;
+    }
+}
