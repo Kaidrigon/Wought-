@@ -1,1720 +1,687 @@
-import {
-    useEffect,
-    useRef,
-} from "react";
-
+import { useEffect, useRef } from "react";
 import {
     Application,
     Container,
     DisplacementFilter,
+    Rectangle,
     Sprite,
     Texture,
 } from "pixi.js";
-
 import { gsap } from "gsap";
-
 import "./LiquidTransition.css";
 
-type HeroDirection =
-    | "next"
-    | "previous";
+type HeroDirection = "next" | "previous";
+
+type PreloadItem = { desktop: string; mobile: string };
 
 type LiquidTransitionProps = {
     desktopImage: string;
     mobileImage: string;
     direction: HeroDirection;
+    /** Other slides, so their textures are ready before you click. */
+    preload?: PreloadItem[];
 };
 
-type LoadedImage = {
-    sprite: Sprite;
-    texture: Texture;
-    baseScale: number;
-};
+type LoadedImage = { sprite: Sprite; baseScale: number };
 
-type PointerState = {
-    x: number;
-    y: number;
-    previousX: number;
-    previousY: number;
-    velocity: number;
-    down: boolean;
-};
+const MOBILE_QUERY = "(max-width: 768px)";
+
+/* Slight overscan so displacement never reveals the edges */
+const OVERSCAN = 1.04;
+
+const isMobile = () => window.matchMedia(MOBILE_QUERY).matches;
+
+function fitSprite(sprite: Sprite, texture: Texture, w: number, h: number) {
+    if (w <= 0 || h <= 0 || texture.width <= 0 || texture.height <= 0) return 1;
+    const scale = Math.max(w / texture.width, h / texture.height) * OVERSCAN;
+    sprite.scale.set(scale);
+    sprite.position.set(w / 2, h / 2);
+    return scale;
+}
+
+function createDisplacementTexture() {
+    const size = 256;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not create displacement canvas.");
+
+    const imageData = ctx.createImageData(size, size);
+    const data = imageData.data;
+    const clamp = (v: number) => Math.max(0, Math.min(255, v));
+
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const i = (y * size + x) * 4;
+            const nx = x / size;
+            const ny = y / size;
+
+            const waveX = Math.sin(nx * 18 + Math.sin(ny * 9) * 4);
+            const waveY = Math.cos(ny * 16 + Math.sin(nx * 11) * 5);
+            const detailX = Math.sin(nx * 42 + ny * 15);
+            const detailY = Math.cos(ny * 38 - nx * 17);
+            const ripple = Math.sin(Math.hypot(nx - 0.5, ny - 0.5) * 42);
+
+            data[i] = clamp(128 + waveX * 38 + detailX * 16 + ripple * 18);
+            data[i + 1] = clamp(128 + waveY * 38 + detailY * 16 + ripple * 14);
+            data[i + 2] = 128;
+            data[i + 3] = 255;
+        }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return Texture.from(canvas);
+}
 
 export default function LiquidTransition({
     desktopImage,
     mobileImage,
     direction,
+    preload,
 }: LiquidTransitionProps) {
-
-    const containerRef =
-        useRef<HTMLDivElement>(null);
-
-    const appRef =
-        useRef<Application | null>(null);
-
-    const sceneRef =
-        useRef<Container | null>(null);
-
-    const imageLayerRef =
-        useRef<Container | null>(null);
-
-    const currentRef =
-        useRef<LoadedImage | null>(null);
-
-    const displacementRef =
-        useRef<{
-            sprite: Sprite;
-            filter: DisplacementFilter;
-        } | null>(null);
-
-    const currentImageRef =
-        useRef<string>("");
-
-    const initializedRef =
-        useRef(false);
-
-    const transitionRef =
-        useRef<gsap.core.Timeline | null>(null);
-
-    const interactionTweenRef =
-        useRef<gsap.core.Tween | null>(null);
-
-    const pointerRef =
-        useRef<PointerState>({
-            x: 0.5,
-            y: 0.5,
-            previousX: 0.5,
-            previousY: 0.5,
-            velocity: 0,
-            down: false,
-        });
-
-    const directionRef =
-        useRef<HeroDirection>(
-            direction
-        );
-
-    const interactionTargetRef =
-        useRef({
-            x: 0,
-            y: 0,
-        });
-
-    const interactionCurrentRef =
-        useRef({
-            x: 0,
-            y: 0,
-        });
-
-    const isTransitioningRef =
-        useRef(false);
-
-    const isPageVisibleRef =
-        useRef(true);
-
-    const getResponsiveImage = () => {
-
-        const isMobile =
-            window.matchMedia(
-                "(max-width: 768px)"
-            ).matches;
-
-        return isMobile
-            ? mobileImage
-            : desktopImage;
-    };
-
-    const startRendering = () => {
-
-        const app =
-            appRef.current;
-
-        if (
-            !app ||
-            document.hidden ||
-            !isPageVisibleRef.current
-        ) {
-            return;
-        }
-
-        app.ticker.start();
-    };
-
-    const loadTexture = (
-        source: string
-    ): Promise<Texture> => {
-
-        return new Promise(
-            (
-                resolve,
-                reject
-            ) => {
-
-                const img =
-                    new Image();
-
-                img.crossOrigin =
-                    "anonymous";
-
-                img.decoding =
-                    "async";
-
-                img.onload = () => {
-
-                    try {
-
-                        resolve(
-                            Texture.from(
-                                img
-                            )
-                        );
-
-                    } catch (error) {
-
-                        reject(
-                            error
-                        );
-                    }
-                };
-
-                img.onerror = () => {
-
-                    reject(
-                        new Error(
-                            `Failed to load hero image: ${source}`
-                        )
-                    );
-                };
-
-                img.src =
-                    source;
-            }
-        );
-    };
-
-    const fitSprite = (
-        sprite: Sprite,
-        texture: Texture,
-        width: number,
-        height: number
-    ) => {
-
-        if (
-            width <= 0 ||
-            height <= 0 ||
-            texture.width <= 0 ||
-            texture.height <= 0
-        ) {
-            return 1;
-        }
-
-        const scale =
-            Math.max(
-                width /
-                    texture.width,
-                height /
-                    texture.height
-            );
-
-        sprite.scale.set(
-            scale
-        );
-
-        sprite.position.set(
-            width / 2,
-            height / 2
-        );
-
-        return scale;
-    };
-
-    const createDisplacementMap = () => {
-
-        /*
-         * 512x512 keeps the liquid map detailed
-         * enough for a full-screen hero while using
-         * much less memory than the previous 1024 map.
-         */
-        const size =
-            512;
-
-        const canvas =
-            document.createElement(
-                "canvas"
-            );
-
-        canvas.width =
-            size;
-
-        canvas.height =
-            size;
-
-        const context =
-            canvas.getContext(
-                "2d"
-            );
-
-        if (!context) {
-
-            throw new Error(
-                "Could not create displacement canvas."
-            );
-        }
-
-        const imageData =
-            context.createImageData(
-                size,
-                size
-            );
-
-        const data =
-            imageData.data;
-
-        for (
-            let y = 0;
-            y < size;
-            y++
-        ) {
-
-            for (
-                let x = 0;
-                x < size;
-                x++
-            ) {
-
-                const index =
-                    (y * size + x) * 4;
-
-                const nx =
-                    x / size;
-
-                const ny =
-                    y / size;
-
-                const waveX =
-                    Math.sin(
-                        nx * 18 +
-                        Math.sin(
-                            ny * 9
-                        ) * 4
-                    );
-
-                const waveY =
-                    Math.cos(
-                        ny * 16 +
-                        Math.sin(
-                            nx * 11
-                        ) * 5
-                    );
-
-                const detailX =
-                    Math.sin(
-                        nx * 42 +
-                        ny * 15
-                    );
-
-                const detailY =
-                    Math.cos(
-                        ny * 38 -
-                        nx * 17
-                    );
-
-                const dx =
-                    nx - 0.5;
-
-                const dy =
-                    ny - 0.5;
-
-                const distance =
-                    Math.sqrt(
-                        dx * dx +
-                        dy * dy
-                    );
-
-                const ripple =
-                    Math.sin(
-                        distance * 42
-                    );
-
-                data[index] =
-                    Math.max(
-                        0,
-                        Math.min(
-                            255,
-                            128 +
-                            waveX * 38 +
-                            detailX * 16 +
-                            ripple * 18
-                        )
-                    );
-
-                data[index + 1] =
-                    Math.max(
-                        0,
-                        Math.min(
-                            255,
-                            128 +
-                            waveY * 38 +
-                            detailY * 16 +
-                            ripple * 14
-                        )
-                    );
-
-                data[index + 2] =
-                    128;
-
-                data[index + 3] =
-                    255;
-            }
-        }
-
-        context.putImageData(
-            imageData,
-            0,
-            0
-        );
-
-        return Texture.from(
-            canvas
-        );
-    };
-
-    const resizeScene = () => {
-
-        const imageLayer =
-            imageLayerRef.current;
-
-        const displacement =
-            displacementRef.current;
-
-        const container =
-            containerRef.current;
-
-        if (
-            !imageLayer ||
-            !container
-        ) {
-            return;
-        }
-
-        const width =
-            container.clientWidth;
-
-        const height =
-            container.clientHeight;
-
-        if (
-            width <= 0 ||
-            height <= 0
-        ) {
-            return;
-        }
-
-        imageLayer.children.forEach(
-            child => {
-
-                if (
-                    child instanceof Sprite
-                ) {
-
-                    const loadedImage =
-                        currentRef.current;
-
-                    if (
-                        loadedImage &&
-                        loadedImage.sprite === child
-                    ) {
-
-                        const baseScale =
-                            fitSprite(
-                                child,
-                                child.texture,
-                                width,
-                                height
-                            );
-
-                        loadedImage.baseScale =
-                            baseScale;
-
-                        return;
-                    }
-
-                    const scale =
-                        fitSprite(
-                            child,
-                            child.texture,
-                            width,
-                            height
-                        );
-
-                    /*
-                     * During a transition the incoming
-                     * image may currently be larger than
-                     * its fitted size. We don't overwrite
-                     * that visual state here.
-                     */
-                    if (
-                        child ===
-                        imageLayer.children[
-                            imageLayer.children.length - 1
-                        ]
-                    ) {
-                        child.scale.set(
-                            scale
-                        );
-                    }
+    const containerRef = useRef<HTMLDivElement>(null);
+    const appRef = useRef<Application | null>(null);
+    const layerRef = useRef<Container | null>(null);
+    const currentRef = useRef<LoadedImage | null>(null);
+    const dispRef = useRef<{ sprite: Sprite; filter: DisplacementFilter } | null>(null);
+
+    const cacheRef = useRef(new Map<string, Promise<Texture>>());
+
+    const currentSrcRef = useRef(""); // what is fully shown
+    const targetSrcRef = useRef(""); // what the latest transition is heading to
+    const pendingSrcRef = useRef(""); // what is currently downloading
+
+    const timelineRef = useRef<gsap.core.Timeline | null>(null);
+    const finalizeRef = useRef<(() => void) | null>(null);
+
+    const aliveRef = useRef(false);
+    const readyRef = useRef(false);
+    const dirtyRef = useRef(true);
+    const wasBusyRef = useRef(false);
+    const transitioningRef = useRef(false);
+
+    const fxTarget = useRef({ x: 0, y: 0 });
+    const fxCurrent = useRef({ x: 0, y: 0 });
+
+    const pointerRef = useRef({ x: 0.5, y: 0.5, previousX: 0.5, previousY: 0.5, down: false });
+
+    /* Always-fresh props for async code */
+    const directionRef = useRef(direction);
+    const propsRef = useRef({ desktopImage, mobileImage, preload });
+    directionRef.current = direction;
+    propsRef.current = { desktopImage, mobileImage, preload };
+
+    const wantedSrc = () =>
+        isMobile() ? propsRef.current.mobileImage : propsRef.current.desktopImage;
+
+    /* ------------------------------------------------------------ */
+    /* Texture cache                                                */
+    /* ------------------------------------------------------------ */
+
+    const loadTexture = (src: string): Promise<Texture> => {
+        const cache = cacheRef.current;
+        let promise = cache.get(src);
+
+        if (!promise) {
+            promise = (async () => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.decoding = "async";
+                img.src = src;
+
+                // Decode off the main thread BEFORE we need it.
+                await img.decode();
+
+                const texture = Texture.from(img);
+
+                // Upload to the GPU now instead of hitching mid-transition.
+                try {
+                    (
+                        appRef.current?.renderer.texture as unknown as
+                            | { initSource?: (source: unknown) => void }
+                            | undefined
+                    )?.initSource?.(texture.source);
+                } catch {
+                    /* optional optimisation */
                 }
-            }
-        );
 
-        if (displacement) {
+                return texture;
+            })();
 
-            displacement.sprite.width =
-                width;
+            const created = promise;
+            created.catch(() => {
+                if (cache.get(src) === created) cache.delete(src);
+            });
 
-            displacement.sprite.height =
-                height;
+            cache.set(src, created);
         }
+
+        return promise;
     };
+
+    const prune = () => {
+        const keep = new Set<string>([
+            currentSrcRef.current,
+            targetSrcRef.current,
+            pendingSrcRef.current,
+        ]);
+
+        const mobile = isMobile();
+        (propsRef.current.preload ?? []).forEach((item) => {
+            keep.add(mobile ? item.mobile : item.desktop);
+        });
+
+        cacheRef.current.forEach((promise, src) => {
+            if (keep.has(src)) return;
+            cacheRef.current.delete(src);
+            promise.then((t) => t.destroy(true)).catch(() => {});
+        });
+    };
+
+    /* ------------------------------------------------------------ */
+    /* Layout                                                       */
+    /* ------------------------------------------------------------ */
+
+    const layout = () => {
+        const app = appRef.current;
+        const container = containerRef.current;
+        const layer = layerRef.current;
+        const disp = dispRef.current;
+
+        if (!app || !container || !layer || !disp) return;
+
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        if (w <= 0 || h <= 0) return;
+
+        app.renderer.resize(w, h);
+
+        // Fixed filter area = no per-frame bounds calculation.
+        layer.filterArea = new Rectangle(0, 0, w, h);
+
+        const size = Math.max(w, h) * 1.3;
+        disp.sprite.width = size;
+        disp.sprite.height = size;
+
+        if (!transitioningRef.current) {
+            disp.sprite.position.set(w / 2, h / 2);
+
+            const cur = currentRef.current;
+            if (cur) {
+                cur.baseScale = fitSprite(cur.sprite, cur.sprite.texture, w, h);
+            }
+        }
+
+        dirtyRef.current = true;
+    };
+
+    /* ------------------------------------------------------------ */
+    /* Interaction                                                  */
+    /* ------------------------------------------------------------ */
 
     const settleInteraction = () => {
+        const disp = dispRef.current;
+        if (!disp) return;
 
-        const displacement =
-            displacementRef.current;
+        gsap.to(fxTarget.current, { x: 0, y: 0, duration: 0.9, ease: "power3.out", overwrite: true });
+        gsap.to(disp.sprite, { rotation: 0, duration: 1.1, ease: "power3.out", overwrite: true });
+    };
 
-        if (!displacement) {
-            return;
+    const pushInteraction = (velocity: number, xDir: number, yDir: number) => {
+        if (!dispRef.current || transitioningRef.current) return;
+
+        const mobile = isMobile();
+        const maximum = mobile ? 42 : 58;
+        const strength = Math.min(maximum, Math.max(0, velocity * (mobile ? 1.8 : 2.2)));
+
+        fxTarget.current.x = xDir * strength;
+        fxTarget.current.y = yDir * strength;
+    };
+
+    const createRipple = (x: number, y: number) => {
+        const disp = dispRef.current;
+        const container = containerRef.current;
+        if (!disp || !container || transitioningRef.current) return;
+
+        const strength = isMobile() ? 85 : 115;
+        const angle = Math.atan2(y - 0.5, x - 0.5);
+
+        disp.sprite.position.set(x * container.clientWidth, y * container.clientHeight);
+
+        gsap.killTweensOf(fxTarget.current);
+        gsap.killTweensOf(disp.sprite);
+
+        fxTarget.current.x = Math.cos(angle) * strength;
+        fxTarget.current.y = Math.sin(angle) * strength;
+
+        gsap.to(fxTarget.current, {
+            x: 0,
+            y: 0,
+            duration: 0.9,
+            ease: "elastic.out(1, 0.55)",
+        });
+
+        gsap.to(disp.sprite, {
+            rotation: disp.sprite.rotation + Math.PI * (Math.random() > 0.5 ? 0.3 : -0.3),
+            duration: 0.9,
+            ease: "power3.out",
+        });
+    };
+
+    /* ------------------------------------------------------------ */
+    /* Transition                                                   */
+    /* ------------------------------------------------------------ */
+
+    const runTransition = (src: string, texture: Texture) => {
+        const container = containerRef.current;
+        const layer = layerRef.current;
+        const disp = dispRef.current;
+        if (!container || !layer || !disp) return;
+
+        targetSrcRef.current = src;
+
+        /*
+         * Rapid clicking: instantly finish whatever is running,
+         * then start the new transition from a clean state.
+         */
+        if (timelineRef.current) {
+            timelineRef.current.kill();
+            timelineRef.current = null;
         }
+        finalizeRef.current?.();
 
-        interactionTweenRef.current?.kill();
+        const current = currentRef.current;
+        if (!current) return;
 
-        interactionTweenRef.current =
-            gsap.to(
-                interactionTargetRef.current,
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        const dir = directionRef.current === "next" ? 1 : -1;
+
+        gsap.killTweensOf([fxTarget.current, disp.sprite, disp.filter.scale]);
+        fxTarget.current.x = fxTarget.current.y = 0;
+        fxCurrent.current.x = fxCurrent.current.y = 0;
+        disp.filter.scale.x = 0;
+        disp.filter.scale.y = 0;
+        disp.sprite.rotation = 0;
+        disp.sprite.position.set(w / 2, h / 2);
+
+        const incoming = new Sprite(texture);
+        incoming.anchor.set(0.5);
+        incoming.alpha = 0;
+        layer.addChild(incoming);
+
+        const base = fitSprite(incoming, texture, w, h);
+        incoming.scale.set(base * 1.06);
+        incoming.x += dir * w * 0.035;
+
+        transitioningRef.current = true;
+        dirtyRef.current = true;
+
+        const finalize = () => {
+            if (finalizeRef.current !== finalize) return;
+            finalizeRef.current = null;
+            timelineRef.current = null;
+
+            current.sprite.destroy();
+
+            const cw = container.clientWidth;
+            const ch = container.clientHeight;
+
+            incoming.alpha = 1;
+            const scale = fitSprite(incoming, texture, cw, ch);
+
+            currentRef.current = { sprite: incoming, baseScale: scale };
+            currentSrcRef.current = src;
+
+            disp.filter.scale.x = 0;
+            disp.filter.scale.y = 0;
+            disp.sprite.rotation = 0;
+            disp.sprite.position.set(cw / 2, ch / 2);
+
+            transitioningRef.current = false;
+            dirtyRef.current = true;
+
+            prune();
+        };
+
+        finalizeRef.current = finalize;
+
+        const tl = gsap.timeline({ onComplete: finalize });
+        timelineRef.current = tl;
+
+        tl
+            /* distortion peaks fast, relaxes */
+            .to(disp.filter.scale, { x: dir * 80, y: 38, duration: 0.16, ease: "power2.in" }, 0)
+            .to(disp.filter.scale, { x: 0, y: 0, duration: 0.4, ease: "power3.out" }, 0.16)
+
+            /* incoming image appears almost immediately */
+            .to(incoming, { alpha: 1, duration: 0.18, ease: "none" }, 0.04)
+            .to(incoming, { x: w / 2, duration: 0.5, ease: "power3.out" }, 0)
+            .to(incoming.scale, { x: base, y: base, duration: 0.5, ease: "power3.out" }, 0)
+
+            /* outgoing image */
+            .to(current.sprite, { x: w / 2 - dir * w * 0.05, duration: 0.3, ease: "power2.in" }, 0)
+            .to(
+                current.sprite.scale,
                 {
-                    x: 0,
-                    y: 0,
-                    duration: 0.9,
-                    ease: "power3.out",
-                }
-            );
+                    x: current.baseScale * 1.03,
+                    y: current.baseScale * 1.03,
+                    duration: 0.3,
+                    ease: "power2.in",
+                },
+                0
+            )
 
-        gsap.to(
-            displacement.sprite,
-            {
-                rotation: 0,
-                duration: 1.1,
-                ease: "power3.out",
-            }
-        );
-
-        startRendering();
+            /* swirl */
+            .to(disp.sprite, { rotation: dir * Math.PI * 0.3, duration: 0.56, ease: "power2.inOut" }, 0);
     };
 
-    const pushInteraction = (
-        velocity: number,
-        xDirection: number,
-        yDirection: number
-    ) => {
+    const goTo = async (src: string) => {
+        if (!readyRef.current) return; // init will pick up the latest image itself
 
-        const displacement =
-            displacementRef.current;
+        pendingSrcRef.current = src === targetSrcRef.current ? "" : src;
+        if (!pendingSrcRef.current) return;
 
-        if (
-            !displacement ||
-            isTransitioningRef.current
-        ) {
+        // Start the liquid wobble immediately; the swap happens once the texture is ready.
+        if (!transitioningRef.current) {
+            const dir = directionRef.current === "next" ? 1 : -1;
+            fxTarget.current.x = dir * 60;
+            fxTarget.current.y = 25;
+            dirtyRef.current = true;
+        }
+
+        let texture: Texture;
+
+        try {
+            texture = await loadTexture(src);
+        } catch (error) {
+            if (pendingSrcRef.current === src) pendingSrcRef.current = "";
+            fxTarget.current.x = 0;
+            fxTarget.current.y = 0;
+            console.error("LiquidTransition image load error:", error);
             return;
         }
 
-        const isMobile =
-            window.matchMedia(
-                "(max-width: 768px)"
-            ).matches;
+        // Unmounted, or the user already asked for something newer.
+        if (!aliveRef.current || pendingSrcRef.current !== src) return;
 
-        const maximum =
-            isMobile
-                ? 42
-                : 58;
-
-        const strength =
-            Math.min(
-                maximum,
-                Math.max(
-                    0,
-                    velocity *
-                    (isMobile ? 1.8 : 2.2)
-                )
-            );
-
-        interactionTargetRef.current.x =
-            xDirection *
-            strength;
-
-        interactionTargetRef.current.y =
-            yDirection *
-            strength;
-
-        startRendering();
+        pendingSrcRef.current = "";
+        runTransition(src, texture);
     };
 
-    const createRipple = (
-        x: number,
-        y: number
-    ) => {
-
-        const displacement =
-            displacementRef.current;
-
-        const container =
-            containerRef.current;
-
-        if (
-            !displacement ||
-            !container ||
-            isTransitioningRef.current
-        ) {
-            return;
-        }
-
-        const isMobile =
-            window.matchMedia(
-                "(max-width: 768px)"
-            ).matches;
-
-        const strength =
-            isMobile
-                ? 85
-                : 115;
-
-        const angle =
-            Math.atan2(
-                y - 0.5,
-                x - 0.5
-            );
-
-        displacement.sprite.position.set(
-            x * container.clientWidth,
-            y * container.clientHeight
-        );
-
-        interactionTweenRef.current?.kill();
-
-        gsap.killTweensOf(
-            interactionTargetRef.current
-        );
-
-        interactionTargetRef.current.x =
-            Math.cos(angle) *
-            strength;
-
-        interactionTargetRef.current.y =
-            Math.sin(angle) *
-            strength;
-
-        gsap.to(
-            interactionTargetRef.current,
-            {
-                x: 0,
-                y: 0,
-                duration: 1.01,
-                ease: "elastic.out(1, 0.55)",
-            }
-        );
-
-        gsap.to(
-            displacement.sprite,
-            {
-                rotation:
-                    displacement.sprite.rotation +
-                    Math.PI *
-                    (
-                        Math.random() > 0.5
-                            ? 0.3
-                            : -0.3
-                    ),
-                duration: 0.9,
-                ease: "power3.out",
-            }
-        );
-
-        startRendering();
-    };
+    /* ------------------------------------------------------------ */
+    /* Init / teardown                                              */
+    /* ------------------------------------------------------------ */
 
     useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
 
-        directionRef.current =
-            direction;
+        let cancelled = false;
+        let resizeObserver: ResizeObserver | null = null;
 
-    }, [
-        direction,
-    ]);
+        aliveRef.current = true;
 
-    useEffect(() => {
+        /*
+         * Single render loop, driven by GSAP so tweens and drawing
+         * are always in the same frame. Only draws when needed.
+         */
+        const tick = () => {
+            const app = appRef.current;
+            const disp = dispRef.current;
+            if (!app || !disp || !readyRef.current) return;
 
-        let cancelled =
-            false;
+            let busy = transitioningRef.current;
 
-        let resizeObserver:
-            ResizeObserver | null =
-            null;
+            if (!busy) {
+                const c = fxCurrent.current;
+                const t = fxTarget.current;
 
-        const container =
-            containerRef.current;
+                c.x += (t.x - c.x) * 0.18;
+                c.y += (t.y - c.y) * 0.18;
 
-        if (!container) {
-            return;
-        }
+                disp.filter.scale.x = c.x;
+                disp.filter.scale.y = c.y;
 
-        const initialize =
-            async () => {
+                const tweening = gsap.isTweening(t) || gsap.isTweening(disp.sprite);
+                const settled =
+                    Math.abs(c.x) + Math.abs(c.y) < 0.08 &&
+                    Math.abs(t.x) + Math.abs(t.y) < 0.08;
 
-                const isMobile =
-                    window.matchMedia(
-                        "(max-width: 768px)"
-                    ).matches;
-
-                const app =
-                    new Application();
-
-                await app.init({
-
-                    resizeTo:
-                        container,
-
-                    backgroundAlpha:
-                        0,
-
-                    antialias:
-                        true,
-
-                    autoDensity:
-                        true,
-
-                    resolution:
-                        isMobile
-                            ? 1
-                            : Math.min(
-                                window.devicePixelRatio ||
-                                    1,
-                                1.25
-                            ),
-
-                    powerPreference:
-                        isMobile
-                            ? "low-power"
-                            : "high-performance",
-                });
-
-                if (cancelled) {
-
-                    app.destroy(
-                        true
-                    );
-
-                    return;
+                if (settled && (c.x || c.y || t.x || t.y)) {
+                    c.x = c.y = t.x = t.y = 0;
+                    disp.filter.scale.x = 0;
+                    disp.filter.scale.y = 0;
+                    dirtyRef.current = true;
                 }
 
-                /*
-                 * No need to continuously render while
-                 * the initial image is downloading.
-                 */
-                app.ticker.stop();
-
-                container.appendChild(
-                    app.canvas
-                );
-
-                appRef.current =
-                    app;
-
-                const scene =
-                    new Container();
-
-                sceneRef.current =
-                    scene;
-
-                app.stage.addChild(
-                    scene
-                );
-
-                const imageLayer =
-                    new Container();
-
-                imageLayerRef.current =
-                    imageLayer;
-
-                scene.addChild(
-                    imageLayer
-                );
-
-                const displacementTexture =
-                    createDisplacementMap();
-
-                const displacementSprite =
-                    new Sprite(
-                        displacementTexture
-                    );
-
-                displacementSprite.alpha =
-                    0;
-
-                scene.addChild(
-                    displacementSprite
-                );
-
-                const displacementFilter =
-                    new DisplacementFilter({
-                        sprite:
-                            displacementSprite,
-
-                        scale: {
-                            x: 0,
-                            y: 0,
-                        },
-                    });
-
-                imageLayer.filters = [
-                    displacementFilter,
-                ];
-
-                displacementRef.current = {
-                    sprite:
-                        displacementSprite,
-
-                    filter:
-                        displacementFilter,
-                };
-
-                /*
-                 * Lightweight interaction renderer.
-                 *
-                 * It only runs while interaction or a
-                 * transition is actually happening.
-                 */
-                app.ticker.add(() => {
-
-                    const displacement =
-                        displacementRef.current;
-
-                    if (!displacement) {
-                        return;
-                    }
-
-                    if (
-                        isTransitioningRef.current
-                    ) {
-                        return;
-                    }
-
-                    const current =
-                        interactionCurrentRef.current;
-
-                    const target =
-                        interactionTargetRef.current;
-
-                    current.x +=
-                        (
-                            target.x -
-                            current.x
-                        ) *
-                        0.18;
-
-                    current.y +=
-                        (
-                            target.y -
-                            current.y
-                        ) *
-                        0.18;
-
-                    displacement.filter.scale.x =
-                        current.x;
-
-                    displacement.filter.scale.y =
-                        current.y;
-
-                    const settled =
-                        Math.abs(
-                            current.x
-                        ) +
-                        Math.abs(
-                            current.y
-                        ) <
-                        0.08 &&
-                        Math.abs(
-                            target.x
-                        ) +
-                        Math.abs(
-                            target.y
-                        ) <
-                        0.08;
-
-                    if (settled) {
-
-                        current.x =
-                            0;
-
-                        current.y =
-                            0;
-
-                        target.x =
-                            0;
-
-                        target.y =
-                            0;
-
-                        displacement.filter.scale.x =
-                            0;
-
-                        displacement.filter.scale.y =
-                            0;
-
-                        app.ticker.stop();
-                    }
-                });
-
-                const initialImage =
-                    getResponsiveImage();
-
-                const texture =
-                    await loadTexture(
-                        initialImage
-                    );
-
-                if (cancelled) {
-
-                    app.destroy(
-                        true
-                    );
-
-                    return;
-                }
-
-                const sprite =
-                    new Sprite(
-                        texture
-                    );
-
-                sprite.anchor.set(
-                    0.5
-                );
-
-                imageLayer.addChild(
-                    sprite
-                );
-
-                const baseScale =
-                    fitSprite(
-                        sprite,
-                        texture,
-                        container.clientWidth,
-                        container.clientHeight
-                    );
-
-                currentRef.current = {
-                    sprite,
-                    texture,
-                    baseScale,
-                };
-
-                currentImageRef.current =
-                    initialImage;
-
-                resizeScene();
-
-                resizeObserver =
-                    new ResizeObserver(
-                        () => {
-                            resizeScene();
-                        }
-                    );
-
-                resizeObserver.observe(
-                    container
-                );
-
-                initializedRef.current =
-                    true;
-
-                startRendering();
-            };
-
-        void initialize().catch(
-            error => {
-
-                if (!cancelled) {
-
-                    console.error(
-                        "LiquidTransition initialization error:",
-                        error
-                    );
-                }
+                busy = tweening || !settled;
             }
-        );
 
-        const handleVisibilityChange =
-            () => {
+            // +1 trailing frame so the final resting state always gets drawn
+            if (busy || wasBusyRef.current || dirtyRef.current) {
+                dirtyRef.current = false;
+                app.render();
+            }
 
-                const app =
-                    appRef.current;
+            wasBusyRef.current = busy;
+        };
 
-                if (!app) {
-                    return;
-                }
+        gsap.ticker.add(tick);
 
-                if (document.hidden) {
+        const initialize = async () => {
+            const mobile = isMobile();
+            const app = new Application();
 
-                    isPageVisibleRef.current =
-                        false;
+            await app.init({
+                width: container.clientWidth || 1,
+                height: container.clientHeight || 1,
+                backgroundAlpha: 0,
+                antialias: false, // images don't need MSAA, saves fill rate
+                autoDensity: true,
+                autoStart: false, // GSAP drives rendering
+                resolution: mobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.25),
+                powerPreference: mobile ? "low-power" : "high-performance",
+            });
 
-                    app.ticker.stop();
+            if (cancelled) {
+                app.destroy(true);
+                return;
+            }
 
-                    return;
-                }
+            container.appendChild(app.canvas);
+            appRef.current = app;
 
-                isPageVisibleRef.current =
-                    true;
+            /*
+             * The displacement sprite lives BEHIND the images so it can
+             * never be seen, but still feeds the filter.
+             */
+            const dispSprite = new Sprite(createDisplacementTexture());
+            dispSprite.anchor.set(0.5);
+            app.stage.addChild(dispSprite);
 
-                const target =
-                    interactionTargetRef.current;
+            const layer = new Container();
+            layerRef.current = layer;
+            app.stage.addChild(layer);
 
-                const current =
-                    interactionCurrentRef.current;
+            const filter = new DisplacementFilter({
+                sprite: dispSprite,
+                scale: { x: 0, y: 0 },
+            });
+            layer.filters = [filter];
 
-                if (
-                    isTransitioningRef.current ||
-                    pointerRef.current.down ||
-                    Math.abs(target.x) +
-                        Math.abs(target.y) >
-                        0.08 ||
-                    Math.abs(current.x) +
-                        Math.abs(current.y) >
-                        0.08
-                ) {
-                    startRendering();
-                }
-            };
+            dispRef.current = { sprite: dispSprite, filter };
 
-        document.addEventListener(
-            "visibilitychange",
-            handleVisibilityChange
-        );
+            // Load whatever is wanted NOW (props may have changed while we initialised)
+            const src = wantedSrc();
+            const texture = await loadTexture(src);
+
+            if (cancelled) {
+                app.destroy(true);
+                return;
+            }
+
+            const sprite = new Sprite(texture);
+            sprite.anchor.set(0.5);
+            layer.addChild(sprite);
+
+            const baseScale = fitSprite(sprite, texture, container.clientWidth, container.clientHeight);
+            currentRef.current = { sprite, baseScale };
+            currentSrcRef.current = src;
+            targetSrcRef.current = src;
+
+            layout();
+
+            resizeObserver = new ResizeObserver(layout);
+            resizeObserver.observe(container);
+
+            readyRef.current = true;
+            dirtyRef.current = true;
+
+            // If the slide changed while we were loading, go there now.
+            void goTo(wantedSrc());
+        };
+
+        void initialize().catch((error) => {
+            if (!cancelled) console.error("LiquidTransition initialization error:", error);
+        });
 
         return () => {
+            cancelled = true;
+            aliveRef.current = false;
+            readyRef.current = false;
 
-            cancelled =
-                true;
-
-            document.removeEventListener(
-                "visibilitychange",
-                handleVisibilityChange
-            );
-
+            gsap.ticker.remove(tick);
             resizeObserver?.disconnect();
 
-            resizeObserver =
-                null;
+            timelineRef.current?.kill();
+            timelineRef.current = null;
+            finalizeRef.current = null;
 
-            transitionRef.current?.kill();
+            const disp = dispRef.current;
+            gsap.killTweensOf(fxTarget.current);
+            if (disp) gsap.killTweensOf([disp.sprite, disp.filter.scale]);
 
-            transitionRef.current =
-                null;
+            transitioningRef.current = false;
+            fxTarget.current.x = fxTarget.current.y = 0;
+            fxCurrent.current.x = fxCurrent.current.y = 0;
 
-            interactionTweenRef.current?.kill();
+            dispRef.current = null;
+            currentRef.current = null;
+            layerRef.current = null;
 
-            interactionTweenRef.current =
-                null;
+            const app = appRef.current;
+            appRef.current = null;
+            app?.destroy(true, { children: true });
 
-            initializedRef.current =
-                false;
+            cacheRef.current.forEach((p) => p.then((t) => t.destroy(true)).catch(() => {}));
+            cacheRef.current.clear();
 
-            isTransitioningRef.current =
-                false;
-
-            interactionTargetRef.current.x =
-                0;
-
-            interactionTargetRef.current.y =
-                0;
-
-            interactionCurrentRef.current.x =
-                0;
-
-            interactionCurrentRef.current.y =
-                0;
-
-            displacementRef.current =
-                null;
-
-            currentRef.current =
-                null;
-
-            imageLayerRef.current =
-                null;
-
-            sceneRef.current =
-                null;
-
-            if (appRef.current) {
-
-                const app =
-                    appRef.current;
-
-                appRef.current =
-                    null;
-
-                app.destroy(
-                    true,
-                    {
-                        children:
-                            true,
-                    }
-                );
-            }
+            currentSrcRef.current = "";
+            targetSrcRef.current = "";
+            pendingSrcRef.current = "";
         };
-
     }, []);
 
+    /* ------------------------------------------------------------ */
+    /* React to slide / breakpoint changes                          */
+    /* ------------------------------------------------------------ */
+
     useEffect(() => {
+        void goTo(wantedSrc());
+    }, [desktopImage, mobileImage]);
 
-        const container =
-            containerRef.current;
+    useEffect(() => {
+        const mq = window.matchMedia(MOBILE_QUERY);
+        const onChange = () => void goTo(wantedSrc());
+        mq.addEventListener("change", onChange);
+        return () => mq.removeEventListener("change", onChange);
+    }, []);
 
-        if (!container) {
-            return;
-        }
+    /* ------------------------------------------------------------ */
+    /* Preload other slides so "next" starts instantly              */
+    /* ------------------------------------------------------------ */
 
-        const updatePointer = (
-            clientX: number,
-            clientY: number
-        ) => {
+    const preloadKey = (preload ?? []).map((p) => `${p.desktop}|${p.mobile}`).join(",");
 
-            const rect =
-                container.getBoundingClientRect();
+    useEffect(() => {
+        const mobile = isMobile();
+        (propsRef.current.preload ?? []).forEach((item) => {
+            loadTexture(mobile ? item.mobile : item.desktop).catch(() => {});
+        });
+    }, [preloadKey]);
 
-            const x =
-                Math.max(
-                    0,
-                    Math.min(
-                        1,
-                        (
-                            clientX -
-                            rect.left
-                        ) /
-                        rect.width
-                    )
-                );
+    /* ------------------------------------------------------------ */
+    /* Pointer                                                      */
+    /* ------------------------------------------------------------ */
 
-            const y =
-                Math.max(
-                    0,
-                    Math.min(
-                        1,
-                        (
-                            clientY -
-                            rect.top
-                        ) /
-                        rect.height
-                    )
-                );
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
 
-            const pointer =
-                pointerRef.current;
+        const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
-            const dx =
-                x -
-                pointer.previousX;
+        const updatePointer = (clientX: number, clientY: number) => {
+            const rect = container.getBoundingClientRect();
+            const x = clamp01((clientX - rect.left) / rect.width);
+            const y = clamp01((clientY - rect.top) / rect.height);
 
-            const dy =
-                y -
-                pointer.previousY;
+            const p = pointerRef.current;
+            const dx = x - p.previousX;
+            const dy = y - p.previousY;
+            const velocity = Math.hypot(dx, dy) * 100;
 
-            const velocity =
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                ) * 100;
+            p.x = x;
+            p.y = y;
+            p.previousX = x;
+            p.previousY = y;
 
-            pointer.x =
-                x;
-
-            pointer.y =
-                y;
-
-            pointer.velocity =
-                velocity;
-
-            pointer.previousX =
-                x;
-
-            pointer.previousY =
-                y;
-
-            if (
-                pointer.down
-            ) {
-
-                pushInteraction(
-                    velocity,
-                    dx * 10,
-                    dy * 10
-                );
-
-            } else if (
-                velocity > 0.7
-            ) {
-
-                pushInteraction(
-                    velocity * 0.35,
-                    dx * 4,
-                    dy * 4
-                );
+            if (p.down) {
+                pushInteraction(velocity, dx * 10, dy * 10);
+            } else if (velocity > 0.7) {
+                pushInteraction(velocity * 0.35, dx * 4, dy * 4);
             }
         };
 
-        const handlePointerMove = (
-            event: PointerEvent
-        ) => {
+        const onMove = (e: PointerEvent) => updatePointer(e.clientX, e.clientY);
 
-            updatePointer(
-                event.clientX,
-                event.clientY
-            );
-        };
-
-        const handlePointerDown = (
-            event: PointerEvent
-        ) => {
-
-            pointerRef.current.down =
-                true;
-
-            updatePointer(
-                event.clientX,
-                event.clientY
-            );
-
-            createRipple(
-                pointerRef.current.x,
-                pointerRef.current.y
-            );
+        const onDown = (e: PointerEvent) => {
+            pointerRef.current.down = true;
+            updatePointer(e.clientX, e.clientY);
+            createRipple(pointerRef.current.x, pointerRef.current.y);
 
             try {
-
-                container.setPointerCapture(
-                    event.pointerId
-                );
-
+                container.setPointerCapture(e.pointerId);
             } catch {
-                // Pointer capture is optional.
+                /* optional */
             }
         };
 
-        const handlePointerUp = () => {
-
-            pointerRef.current.down =
-                false;
-
+        const onUp = () => {
+            pointerRef.current.down = false;
             settleInteraction();
         };
 
-        const handlePointerCancel = () => {
-
-            pointerRef.current.down =
-                false;
-
-            settleInteraction();
+        const onLeave = () => {
+            if (!pointerRef.current.down) settleInteraction();
         };
 
-        const handlePointerLeave = () => {
-
-            if (
-                !pointerRef.current.down
-            ) {
-
-                settleInteraction();
-            }
-        };
-
-        container.addEventListener(
-            "pointermove",
-            handlePointerMove
-        );
-
-        container.addEventListener(
-            "pointerdown",
-            handlePointerDown
-        );
-
-        container.addEventListener(
-            "pointerup",
-            handlePointerUp
-        );
-
-        container.addEventListener(
-            "pointercancel",
-            handlePointerCancel
-        );
-
-        container.addEventListener(
-            "pointerleave",
-            handlePointerLeave
-        );
+        container.addEventListener("pointermove", onMove);
+        container.addEventListener("pointerdown", onDown);
+        container.addEventListener("pointerup", onUp);
+        container.addEventListener("pointercancel", onUp);
+        container.addEventListener("pointerleave", onLeave);
 
         return () => {
-
-            container.removeEventListener(
-                "pointermove",
-                handlePointerMove
-            );
-
-            container.removeEventListener(
-                "pointerdown",
-                handlePointerDown
-            );
-
-            container.removeEventListener(
-                "pointerup",
-                handlePointerUp
-            );
-
-            container.removeEventListener(
-                "pointercancel",
-                handlePointerCancel
-            );
-
-            container.removeEventListener(
-                "pointerleave",
-                handlePointerLeave
-            );
+            container.removeEventListener("pointermove", onMove);
+            container.removeEventListener("pointerdown", onDown);
+            container.removeEventListener("pointerup", onUp);
+            container.removeEventListener("pointercancel", onUp);
+            container.removeEventListener("pointerleave", onLeave);
         };
-
     }, []);
 
-    useEffect(() => {
-
-        if (
-            !initializedRef.current
-        ) {
-            return;
-        }
-
-        const nextImage =
-            getResponsiveImage();
-
-        if (
-            currentImageRef.current ===
-            nextImage
-        ) {
-            return;
-        }
-
-        let cancelled =
-            false;
-
-        const transitionToNextImage =
-            async () => {
-
-                const imageLayer =
-                    imageLayerRef.current;
-
-                const current =
-                    currentRef.current;
-
-                const displacement =
-                    displacementRef.current;
-
-                const container =
-                    containerRef.current;
-
-                const app =
-                    appRef.current;
-
-                if (
-                    !imageLayer ||
-                    !current ||
-                    !displacement ||
-                    !container ||
-                    !app
-                ) {
-                    return;
-                }
-
-                let texture:
-                    Texture;
-
-                try {
-
-                    texture =
-                        await loadTexture(
-                            nextImage
-                        );
-
-                } catch (error) {
-
-                    console.error(
-                        "LiquidTransition image load error:",
-                        error
-                    );
-
-                    return;
-                }
-
-                if (cancelled) {
-                    return;
-                }
-
-                isTransitioningRef.current =
-                    true;
-
-                interactionTargetRef.current.x =
-                    0;
-
-                interactionTargetRef.current.y =
-                    0;
-
-                interactionCurrentRef.current.x =
-                    0;
-
-                interactionCurrentRef.current.y =
-                    0;
-
-                startRendering();
-
-                const incoming =
-                    new Sprite(
-                        texture
-                    );
-
-                incoming.anchor.set(
-                    0.5
-                );
-
-                incoming.alpha =
-                    0;
-
-                imageLayer.addChild(
-                    incoming
-                );
-
-                const incomingBaseScale =
-                    fitSprite(
-                        incoming,
-                        texture,
-                        container.clientWidth,
-                        container.clientHeight
-                    );
-
-                /*
-                 * Preserve the actual fitted scale.
-                 *
-                 * We animate relative to this value
-                 * instead of using unsupported GSAP
-                 * scaleX / scaleY properties.
-                 */
-                incoming.scale.x =
-                    incomingBaseScale *
-                    1.06;
-
-                incoming.scale.y =
-                    incomingBaseScale *
-                    1.06;
-
-                transitionRef.current?.kill();
-
-                const isNext =
-                    directionRef.current ===
-                    "next";
-
-                const directionX =
-                    isNext
-                        ? 1
-                        : -1;
-
-                incoming.position.x +=
-                    directionX *
-                    container.clientWidth *
-                    0.035;
-
-                current.sprite.alpha =
-                    1;
-
-                displacement.sprite.alpha =
-                    1;
-
-                displacement.sprite.position.set(
-                    container.clientWidth / 2,
-                    container.clientHeight / 2
-                );
-
-                displacement.filter.scale.x =
-                    directionX * 18;
-
-                displacement.filter.scale.y =
-                    10;
-
-                const timeline =
-                    gsap.timeline({
-                        onComplete: () => {
-
-                            if (cancelled) {
-                                return;
-                            }
-
-                            current.sprite.destroy();
-
-                            currentRef.current = {
-                                sprite:
-                                    incoming,
-
-                                texture,
-
-                                baseScale:
-                                    incomingBaseScale,
-                            };
-
-                            currentImageRef.current =
-                                nextImage;
-
-                            incoming.alpha =
-                                1;
-
-                            incoming.scale.set(
-                                incomingBaseScale
-                            );
-
-                            incoming.position.set(
-                                container.clientWidth / 2,
-                                container.clientHeight / 2
-                            );
-
-                            displacement.filter.scale.x =
-                                0;
-
-                            displacement.filter.scale.y =
-                                0;
-
-                            displacement.sprite.alpha =
-                                0;
-
-                            displacement.sprite.position.set(
-                                container.clientWidth / 2,
-                                container.clientHeight / 2
-                            );
-
-                            transitionRef.current =
-                                null;
-
-                            isTransitioningRef.current =
-                                false;
-
-                            startRendering();
-                        },
-                    });
-
-                transitionRef.current =
-                    timeline;
-
-                timeline
-
-                    .to(
-                        displacement.filter.scale,
-                        {
-                            x:
-                                directionX *
-                                110,
-
-                            y:
-                                58,
-
-                            duration:
-                                0.28,
-
-                            ease:
-                                "power3.in",
-                        },
-                        0
-                    )
-
-                    .to(
-                        incoming,
-                        {
-                            alpha:
-                                1,
-
-                            x:
-                                container.clientWidth /
-                                2,
-
-                            duration:
-                                0.72,
-
-                            ease:
-                                "power3.out",
-                        },
-                        0.12
-                    )
-
-                    .to(
-                        incoming.scale,
-                        {
-                            x:
-                                incomingBaseScale,
-
-                            y:
-                                incomingBaseScale,
-
-                            duration:
-                                0.72,
-
-                            ease:
-                                "power3.out",
-                        },
-                        0.12
-                    )
-
-                    .to(
-                        current.sprite,
-                        {
-                            x:
-                                container.clientWidth /
-                                2 -
-                                directionX *
-                                container.clientWidth *
-                                0.08,
-
-                            duration:
-                                0.58,
-
-                            ease:
-                                "power3.in",
-                        },
-                        0
-                    )
-
-                    .to(
-                        current.sprite.scale,
-                        {
-                            x:
-                                current.baseScale *
-                                1.035,
-
-                            y:
-                                current.baseScale *
-                                1.035,
-
-                            duration:
-                                0.58,
-
-                            ease:
-                                "power3.in",
-                        },
-                        0
-                    )
-
-                    .to(
-                        displacement.filter.scale,
-                        {
-                            x:
-                                directionX *
-                                155,
-
-                            y:
-                                -75,
-
-                            duration:
-                                0.36,
-
-                            ease:
-                                "power2.inOut",
-                        },
-                        0.28
-                    )
-
-                    .to(
-                        displacement.sprite,
-                        {
-                            rotation:
-                                directionX *
-                                Math.PI *
-                                0.55,
-
-                            duration:
-                                0.82,
-
-                            ease:
-                                "power2.inOut",
-                        },
-                        0
-                    )
-
-                    .to(
-                        displacement.filter.scale,
-                        {
-                            x:
-                                directionX *
-                                42,
-
-                            y:
-                                18,
-
-                            duration:
-                                0.42,
-
-                            ease:
-                                "power3.out",
-                        },
-                        0.62
-                    )
-
-                    .to(
-                        displacement.filter.scale,
-                        {
-                            x: 0,
-                            y: 0,
-
-                            duration:
-                                0.55,
-
-                            ease:
-                                "power3.inOut",
-                        },
-                        0.92
-                    )
-
-                    .to(
-                        displacement.sprite,
-                        {
-                            rotation: 0,
-
-                            duration:
-                                0.7,
-
-                            ease:
-                                "power3.out",
-                        },
-                        0.88
-                    );
-            };
-
-        void transitionToNextImage();
-
-        return () => {
-
-            cancelled =
-                true;
-        };
-
-    }, [
-        desktopImage,
-        mobileImage,
-    ]);
-
-    return (
-        <div
-            ref={containerRef}
-            className="liquid-transition"
-            aria-hidden="true"
-        />
-    );
+    return <div ref={containerRef} className="liquid-transition" aria-hidden="true" />;
 }

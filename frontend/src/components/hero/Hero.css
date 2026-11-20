@@ -11,30 +11,11 @@
 /* ACTIVE SLIDE                                      */
 /* ================================================= */
 
-.hero-slide--active {
-    z-index: 2;
-    pointer-events: auto;
-
-    animation:
-        hero-active-in
-        900ms
-        cubic-bezier(.22, .61, .36, 1)
-        both;
-}
 
 /* ================================================= */
 /* PREVIOUS SLIDE                                    */
 /* ================================================= */
 
-.hero-slide--previous {
-    z-index: 1;
-
-    animation:
-        hero-previous-out
-        900ms
-        cubic-bezier(.22, .61, .36, 1)
-        both;
-}
 
 /* ================================================= */
 /* CINEMATIC EDGE                                    */
@@ -71,25 +52,6 @@
 /* HERO TRANSITION                                   */
 /* ================================================= */
 
-@keyframes hero-active-in {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes hero-previous-out {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0;
-    }
-}
 
 /* ================================================= */
 /* MOBILE                                            */

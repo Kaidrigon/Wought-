@@ -1,7 +1,8 @@
+
 import { API_BASE_URL } from "../../../../services/api/api";
+
 import {
     Application,
-    Assets,
     Container,
     DisplacementFilter,
     Rectangle,
@@ -106,7 +107,10 @@ export default class AnimeTransitionEngine {
 
         const texture = await this.loadImage(initialImage);
 
-        if (this.destroyed) return;
+        if (this.destroyed) {
+            texture.destroy(true);
+            return;
+        }
 
         const sprite = new Sprite(texture);
 
@@ -136,26 +140,35 @@ export default class AnimeTransitionEngine {
     }
 
     private async loadImage(url: string): Promise<Texture> {
-    if (!url) {
-        throw new Error("No image URL was provided.");
-    }
+        if (!url) {
+            throw new Error("No image URL was provided.");
+        }
 
-    const proxyUrl = new URL(
-        "/proxy-anime-image",
-        API_BASE_URL
-    );
-
-    proxyUrl.searchParams.set("url", url);
-
-    try {
-        return await Assets.load<Texture>(proxyUrl.toString());
-    } catch (error) {
-        throw new Error(
-            `Failed to load AniList image through Wought+ proxy: ${url}`,
-            { cause: error }
+        const proxyUrl = new URL(
+            "/proxy-anime-image",
+            API_BASE_URL
         );
+
+        proxyUrl.searchParams.set("url", url);
+
+        const image = new Image();
+
+        image.decoding = "async";
+        image.crossOrigin = "anonymous";
+        image.src = proxyUrl.toString();
+
+        try {
+            await image.decode();
+
+            return Texture.from(image);
+        } catch (error) {
+            throw new Error(
+                `Failed to load Anime image through Wought+ proxy: ${url}`,
+                { cause: error }
+            );
+        }
     }
-}
+
     private fitImage(sprite: Sprite, texture: Texture): number {
         const scale = Math.max(
             this.width / texture.width,
@@ -183,7 +196,10 @@ export default class AnimeTransitionEngine {
         const context = canvas.getContext("2d");
 
         if (!context) {
-            throw new Error("Could not create displacement map.");
+            console.warn(
+                "Anime transition: Could not create displacement map."
+            );
+            return;
         }
 
         const imageData = context.createImageData(size, size);
@@ -215,12 +231,18 @@ export default class AnimeTransitionEngine {
 
                 data[index] = Math.max(
                     0,
-                    Math.min(255, 128 + waveX * 43 + detail * 20 + ripple * 15)
+                    Math.min(
+                        255,
+                        128 + waveX * 43 + detail * 20 + ripple * 15
+                    )
                 );
 
                 data[index + 1] = Math.max(
                     0,
-                    Math.min(255, 128 + waveY * 43 - detail * 17 + ripple * 15)
+                    Math.min(
+                        255,
+                        128 + waveY * 43 - detail * 17 + ripple * 15
+                    )
                 );
 
                 data[index + 2] = 128;
@@ -247,18 +269,26 @@ export default class AnimeTransitionEngine {
 
         this.app?.stage.addChild(displacementSprite);
 
-        const filter = new DisplacementFilter({
-            sprite: displacementSprite,
-            scale: {
-                x: 0,
-                y: 0,
-            },
-        });
-
-        this.imageLayer.filters = [filter];
-
         this.displacementSprite = displacementSprite;
-        this.displacementFilter = filter;
+
+        try {
+            const filter = new DisplacementFilter({
+                sprite: displacementSprite,
+                scale: 0,
+            });
+
+            this.imageLayer.filters = [filter];
+
+            this.displacementFilter = filter;
+        } catch (error) {
+            console.warn(
+                "Anime transition: Displacement filter unavailable. Using fragment transition instead.",
+                error
+            );
+
+            this.displacementFilter = null;
+            this.imageLayer.filters = [];
+        }
     }
 
     private resize(): void {
@@ -357,11 +387,8 @@ export default class AnimeTransitionEngine {
                     (y + frameHeight / 2 - textureHeight / 2) *
                     image.scale;
 
-                const targetX =
-                    this.width / 2 + centerX;
-
-                const targetY =
-                    this.height / 2 + centerY;
+                const targetX = this.width / 2 + centerX;
+                const targetY = this.height / 2 + centerY;
 
                 sprite.position.set(targetX, targetY);
 
@@ -392,7 +419,10 @@ export default class AnimeTransitionEngine {
 
         const incomingTexture = await this.loadImage(url);
 
-        if (this.destroyed) return;
+        if (this.destroyed) {
+            incomingTexture.destroy(true);
+            return;
+        }
 
         if (this.reducedMotion) {
             this.showImmediately(incomingTexture, url);
@@ -403,7 +433,10 @@ export default class AnimeTransitionEngine {
 
         const outgoing = this.currentImage;
 
-        if (!outgoing) return;
+        if (!outgoing) {
+            incomingTexture.destroy(true);
+            return;
+        }
 
         this.transitioning = true;
 
@@ -419,9 +452,7 @@ export default class AnimeTransitionEngine {
             incomingTexture
         );
 
-        incomingSprite.scale.set(
-            incomingScale * 1.08
-        );
+        incomingSprite.scale.set(incomingScale * 1.08);
 
         this.createFragments(outgoing);
 
@@ -577,7 +608,9 @@ export default class AnimeTransitionEngine {
                 .to(
                     fragment.sprite,
                     {
-                        x: fragment.targetX + scatterX +
+                        x:
+                            fragment.targetX +
+                            scatterX +
                             directionMultiplier * this.width * 0.12,
                         y: fragment.targetY + scatterY,
                         rotation,
@@ -601,8 +634,12 @@ export default class AnimeTransitionEngine {
     }
 
     private showImmediately(texture: Texture, url: string): void {
-        if (!this.currentImage) return;
+        if (!this.currentImage) {
+            texture.destroy(true);
+            return;
+        }
 
+        this.imageLayer.removeChild(this.currentImage.sprite);
         this.currentImage.sprite.destroy();
 
         this.clearFragments();
