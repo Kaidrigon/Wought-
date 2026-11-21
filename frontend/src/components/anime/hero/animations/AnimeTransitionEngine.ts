@@ -5,6 +5,7 @@ import {
     Application,
     Container,
     DisplacementFilter,
+    Graphics,
     Rectangle,
     Sprite,
     Texture,
@@ -36,7 +37,11 @@ export default class AnimeTransitionEngine {
 
     private fragmentLayer = new Container();
 
+    private chromeLayer = new Container();
+
     private currentImage: ImageLayer | null = null;
+
+    private pendingImage: ImageLayer | null = null;
 
     private displacementSprite: Sprite | null = null;
 
@@ -48,6 +53,8 @@ export default class AnimeTransitionEngine {
 
     private fragments: Fragment[] = [];
 
+    private chromeStreaks: Graphics[] = [];
+
     private initialized = false;
 
     private destroyed = false;
@@ -55,6 +62,8 @@ export default class AnimeTransitionEngine {
     private transitioning = false;
 
     private currentUrl = "";
+
+    private requestId = 0;
 
     private width = 0;
 
@@ -100,10 +109,12 @@ export default class AnimeTransitionEngine {
 
         app.ticker.stop();
 
+        // The displacement map sits behind the actual artwork.
+        this.createDisplacement();
+
         app.stage.addChild(this.imageLayer);
         app.stage.addChild(this.fragmentLayer);
-
-        this.createDisplacement();
+        app.stage.addChild(this.chromeLayer);
 
         const texture = await this.loadImage(initialImage);
 
@@ -185,6 +196,10 @@ export default class AnimeTransitionEngine {
         return scale;
     }
 
+    // --------------------------------------------------
+    // LIQUID CHROME DISPLACEMENT
+    // --------------------------------------------------
+
     private createDisplacement(): void {
         const size = 512;
 
@@ -212,28 +227,31 @@ export default class AnimeTransitionEngine {
                 const nx = x / size;
                 const ny = y / size;
 
+                // Broad liquid waves.
                 const waveX =
-                    Math.sin(nx * 19 + Math.sin(ny * 8) * 4);
+                    Math.sin(nx * 15 + Math.sin(ny * 7) * 3.5);
 
                 const waveY =
-                    Math.cos(ny * 17 + Math.sin(nx * 10) * 5);
+                    Math.cos(ny * 13 + Math.sin(nx * 8) * 4);
 
+                // Fine holographic surface detail.
                 const detail =
-                    Math.sin(nx * 35 + ny * 22) *
-                    Math.cos(ny * 31 - nx * 18);
+                    Math.sin(nx * 29 + ny * 19) *
+                    Math.cos(ny * 25 - nx * 16);
 
+                // Expanding liquid ripple.
                 const radial = Math.sqrt(
                     (nx - 0.5) ** 2 +
                     (ny - 0.5) ** 2
                 );
 
-                const ripple = Math.sin(radial * 55);
+                const ripple = Math.sin(radial * 42);
 
                 data[index] = Math.max(
                     0,
                     Math.min(
                         255,
-                        128 + waveX * 43 + detail * 20 + ripple * 15
+                        128 + waveX * 48 + detail * 15 + ripple * 18
                     )
                 );
 
@@ -241,7 +259,7 @@ export default class AnimeTransitionEngine {
                     0,
                     Math.min(
                         255,
-                        128 + waveY * 43 - detail * 17 + ripple * 15
+                        128 + waveY * 48 - detail * 15 + ripple * 18
                     )
                 );
 
@@ -265,11 +283,11 @@ export default class AnimeTransitionEngine {
 
         displacementSprite.width = this.width;
         displacementSprite.height = this.height;
-        displacementSprite.alpha = 0;
-
-        this.app?.stage.addChild(displacementSprite);
 
         this.displacementSprite = displacementSprite;
+
+        // Keep the map behind the artwork so it cannot obscure it.
+        this.app?.stage.addChildAt(displacementSprite, 0);
 
         try {
             const filter = new DisplacementFilter({
@@ -290,6 +308,10 @@ export default class AnimeTransitionEngine {
             this.imageLayer.filters = [];
         }
     }
+
+    // --------------------------------------------------
+    // RESPONSIVE RESIZING
+    // --------------------------------------------------
 
     private resize(): void {
         if (!this.app || this.destroyed) return;
@@ -324,6 +346,10 @@ export default class AnimeTransitionEngine {
         this.app.render();
     }
 
+    // --------------------------------------------------
+    // FRAGMENT SYSTEM
+    // --------------------------------------------------
+
     private clearFragments(): void {
         for (const fragment of this.fragments) {
             this.fragmentLayer.removeChild(fragment.sprite);
@@ -339,8 +365,10 @@ export default class AnimeTransitionEngine {
     private createFragments(image: ImageLayer): void {
         this.clearFragments();
 
-        const columns = 8;
-        const rows = 5;
+        // Smaller fragments give the transition a more
+        // digital, crystalline appearance.
+        const columns = 12;
+        const rows = 7;
 
         const textureWidth = image.texture.width;
         const textureHeight = image.texture.height;
@@ -404,6 +432,121 @@ export default class AnimeTransitionEngine {
         }
     }
 
+    // --------------------------------------------------
+    // HOLOGRAPHIC CHROME SWEEP
+    // --------------------------------------------------
+
+    private clearChromeStreaks(): void {
+        for (const streak of this.chromeStreaks) {
+            this.chromeLayer.removeChild(streak);
+            streak.destroy();
+        }
+
+        this.chromeStreaks = [];
+    }
+
+    private createChromeStreaks(): void {
+        this.clearChromeStreaks();
+
+        const streakColors = [
+            0xffffff,
+            0x9fffee,
+            0xb9a6ff,
+            0xe8faff,
+        ];
+
+        const streakWidths = [
+            0.055,
+            0.025,
+            0.035,
+            0.012,
+        ];
+
+        streakColors.forEach((color, index) => {
+            const streakWidth = Math.max(
+                12,
+                this.width * streakWidths[index]
+            );
+
+            const streak = new Graphics();
+
+            streak
+                .rect(
+                    -streakWidth / 2,
+                    -this.height,
+                    streakWidth,
+                    this.height * 2
+                )
+                .fill({ color });
+
+            streak.position.set(
+                -this.width * 0.8 - index * 80,
+                this.height / 2
+            );
+
+            streak.rotation = -0.16;
+
+            streak.alpha = 0;
+
+            this.chromeLayer.addChild(streak);
+
+            this.chromeStreaks.push(streak);
+        });
+    }
+
+    private animateChromeSweep(
+        timeline: gsap.core.Timeline,
+        directionMultiplier: number
+    ): void {
+        this.createChromeStreaks();
+
+        this.chromeStreaks.forEach((streak, index) => {
+            const startX =
+                -this.width * 0.8 - index * 80;
+
+            const endX =
+                this.width * 1.8 +
+                index * 100;
+
+            const delay = index * 0.075;
+
+            timeline
+                .set(
+                    streak,
+                    {
+                        x: startX,
+                        alpha: 0,
+                    },
+                    0.18 + delay
+                )
+                .to(
+                    streak,
+                    {
+                        x: directionMultiplier === 1
+                            ? endX
+                            : -endX,
+                        alpha: index === 0 ? 0.34 : 0.19,
+                        duration: 0.8,
+                        ease: "power2.inOut",
+                    },
+                    0.18 + delay
+                )
+                .to(
+                    streak,
+                    {
+                        alpha: 0,
+                        duration: 0.35,
+                        ease: "power2.out",
+                    },
+                    0.72 + delay
+                );
+        });
+    }
+
+    // --------------------------------------------------
+    // MAIN TRANSITION
+    // --------------------------------------------------
+
     async transitionTo(
         url: string,
         direction: TransitionDirection
@@ -412,14 +555,22 @@ export default class AnimeTransitionEngine {
             !this.initialized ||
             this.destroyed ||
             !this.currentImage ||
+            !url ||
             url === this.currentUrl
         ) {
             return;
         }
 
+        const thisRequest = ++this.requestId;
+
         const incomingTexture = await this.loadImage(url);
 
-        if (this.destroyed) {
+        // A newer navigation request may have arrived
+        // while this image was loading.
+        if (
+            this.destroyed ||
+            thisRequest !== this.requestId
+        ) {
             incomingTexture.destroy(true);
             return;
         }
@@ -452,7 +603,13 @@ export default class AnimeTransitionEngine {
             incomingTexture
         );
 
-        incomingSprite.scale.set(incomingScale * 1.08);
+        incomingSprite.scale.set(incomingScale * 1.075);
+
+        this.pendingImage = {
+            sprite: incomingSprite,
+            texture: incomingTexture,
+            scale: incomingScale,
+        };
 
         this.createFragments(outgoing);
 
@@ -470,7 +627,8 @@ export default class AnimeTransitionEngine {
             );
         }
 
-        const directionMultiplier = direction === "next" ? 1 : -1;
+        const directionMultiplier =
+            direction === "next" ? 1 : -1;
 
         const timeline = gsap.timeline({
             onComplete: () => {
@@ -478,10 +636,13 @@ export default class AnimeTransitionEngine {
 
                 this.imageLayer.removeChild(outgoing.sprite);
                 outgoing.sprite.destroy();
+                outgoing.texture.destroy(true);
 
                 this.clearFragments();
+                this.clearChromeStreaks();
 
                 incomingSprite.alpha = 1;
+
                 incomingSprite.scale.set(incomingScale);
 
                 incomingSprite.position.set(
@@ -494,6 +655,8 @@ export default class AnimeTransitionEngine {
                     texture: incomingTexture,
                     scale: incomingScale,
                 };
+
+                this.pendingImage = null;
 
                 this.currentUrl = url;
 
@@ -518,14 +681,15 @@ export default class AnimeTransitionEngine {
 
         this.app?.ticker.start();
 
+        // Liquid chrome distortion.
         if (displacement) {
             timeline
                 .to(
                     displacement.scale,
                     {
-                        x: directionMultiplier * 100,
-                        y: 65,
-                        duration: 0.65,
+                        x: directionMultiplier * 115,
+                        y: 75,
+                        duration: 0.62,
                         ease: "power3.inOut",
                     },
                     0
@@ -533,22 +697,22 @@ export default class AnimeTransitionEngine {
                 .to(
                     displacement.scale,
                     {
-                        x: directionMultiplier * 155,
-                        y: -85,
-                        duration: 0.42,
+                        x: directionMultiplier * 165,
+                        y: -95,
+                        duration: 0.48,
                         ease: "power2.inOut",
                     },
-                    0.42
+                    0.4
                 )
                 .to(
                     displacement.scale,
                     {
                         x: 0,
                         y: 0,
-                        duration: 0.65,
+                        duration: 0.7,
                         ease: "power3.out",
                     },
-                    1.1
+                    1.05
                 );
         }
 
@@ -556,53 +720,62 @@ export default class AnimeTransitionEngine {
             timeline.to(
                 displacementSprite,
                 {
-                    rotation: directionMultiplier * Math.PI * 0.45,
-                    duration: 1.1,
+                    rotation: directionMultiplier * Math.PI * 0.5,
+                    duration: 1.15,
                     ease: "power2.inOut",
                 },
                 0
             );
         }
 
+        // Incoming image reveal.
         timeline
             .to(
                 incomingSprite,
                 {
                     alpha: 1,
-                    duration: 0.95,
+                    duration: 0.9,
                     ease: "power2.out",
                 },
-                0.38
+                0.34
             )
             .to(
                 incomingSprite.scale,
                 {
                     x: incomingScale,
                     y: incomingScale,
-                    duration: 1.15,
+                    duration: 1.2,
                     ease: "power3.out",
                 },
-                0.25
+                0.2
             );
 
+        // Holographic sweep across the transition.
+        this.animateChromeSweep(
+            timeline,
+            directionMultiplier
+        );
+
+        // Digital fragments disperse from the outgoing image.
         for (const fragment of this.fragments) {
             const random = Math.random();
 
             const scatterX =
                 (random - 0.5) *
                 this.width *
-                0.85;
+                0.7;
 
             const scatterY =
                 (Math.random() - 0.5) *
                 this.height *
-                0.85;
+                0.65;
 
             const rotation =
                 (Math.random() - 0.5) *
-                (Math.PI * 1.6);
+                Math.PI *
+                1.25;
 
-            const delay = Math.random() * 0.24;
+            const delay = Math.random() * 0.3;
 
             timeline
                 .to(
@@ -611,38 +784,48 @@ export default class AnimeTransitionEngine {
                         x:
                             fragment.targetX +
                             scatterX +
-                            directionMultiplier * this.width * 0.12,
+                            directionMultiplier * this.width * 0.1,
                         y: fragment.targetY + scatterY,
                         rotation,
                         alpha: 0,
-                        duration: 0.85 + Math.random() * 0.3,
+                        duration: 0.9 + Math.random() * 0.25,
                         ease: "power3.in",
                     },
-                    0.05 + delay
+                    0.03 + delay
                 )
                 .to(
                     fragment.sprite.scale,
                     {
-                        x: outgoing.scale * 0.72,
-                        y: outgoing.scale * 0.72,
-                        duration: 0.85,
+                        x: outgoing.scale * 0.68,
+                        y: outgoing.scale * 0.68,
+                        duration: 0.9,
                         ease: "power2.in",
                     },
-                    0.05 + delay
+                    0.03 + delay
                 );
         }
     }
 
+    // --------------------------------------------------
+    // INSTANT IMAGE CHANGE
+    // --------------------------------------------------
+
     private showImmediately(texture: Texture, url: string): void {
+        this.cancelActiveTransition();
+
         if (!this.currentImage) {
             texture.destroy(true);
             return;
         }
 
-        this.imageLayer.removeChild(this.currentImage.sprite);
-        this.currentImage.sprite.destroy();
+        const previous = this.currentImage;
+
+        this.imageLayer.removeChild(previous.sprite);
+        previous.sprite.destroy();
+        previous.texture.destroy(true);
 
         this.clearFragments();
+        this.clearChromeStreaks();
 
         const sprite = new Sprite(texture);
 
@@ -663,22 +846,31 @@ export default class AnimeTransitionEngine {
         this.app?.render();
     }
 
+    // --------------------------------------------------
+    // TRANSITION CLEANUP
+    // --------------------------------------------------
+
     private cancelActiveTransition(): void {
         this.timeline?.kill();
         this.timeline = null;
 
         this.clearFragments();
+        this.clearChromeStreaks();
 
-        if (!this.currentImage) return;
+        if (this.pendingImage) {
+            this.imageLayer.removeChild(
+                this.pendingImage.sprite
+            );
 
-        this.imageLayer.children
-            .filter(child => child !== this.currentImage?.sprite)
-            .forEach(child => {
-                this.imageLayer.removeChild(child);
-                child.destroy();
-            });
+            this.pendingImage.sprite.destroy();
+            this.pendingImage.texture.destroy(true);
 
-        this.currentImage.sprite.alpha = 1;
+            this.pendingImage = null;
+        }
+
+        if (this.currentImage) {
+            this.currentImage.sprite.alpha = 1;
+        }
 
         this.displacementFilter?.scale.set(0, 0);
 
@@ -690,10 +882,17 @@ export default class AnimeTransitionEngine {
         this.transitioning = false;
     }
 
+    // --------------------------------------------------
+    // DESTROY
+    // --------------------------------------------------
+
     destroy(): void {
         if (this.destroyed) return;
 
         this.destroyed = true;
+
+        // Invalidate any image requests still loading.
+        this.requestId++;
 
         this.timeline?.kill();
         this.timeline = null;
@@ -702,13 +901,26 @@ export default class AnimeTransitionEngine {
         this.resizeObserver = null;
 
         this.clearFragments();
+        this.clearChromeStreaks();
+
+        if (this.pendingImage) {
+            this.pendingImage.sprite.destroy();
+            this.pendingImage.texture.destroy(true);
+            this.pendingImage = null;
+        }
+
+        if (this.currentImage) {
+            this.currentImage.sprite.destroy();
+            this.currentImage.texture.destroy(true);
+            this.currentImage = null;
+        }
 
         this.app?.ticker.stop();
 
         this.app?.destroy();
 
         this.app = null;
-        this.currentImage = null;
+
         this.displacementFilter = null;
         this.displacementSprite = null;
 

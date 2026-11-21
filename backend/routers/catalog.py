@@ -762,6 +762,7 @@ async def test_tmdb_logo(movie_id: int):
     }
 
 
+
 @router.get("/trending/anime")
 async def trending_anime(page: int = 1):
     query = """
@@ -776,6 +777,7 @@ async def trending_anime(page: int = 1):
                 description
                 coverImage {
                     large
+                    extraLarge
                 }
                 bannerImage
                 format
@@ -794,13 +796,23 @@ async def trending_anime(page: int = 1):
     return [
         {
             "anilist_id": item.get("id"),
-            "media_type": parse_anilist_media_type(item.get("format", "")),
+            "media_type": parse_anilist_media_type(
+                item.get("format", "")
+            ),
             "title": get_anilist_title(item),
             "release_date": str(
                 item.get("startDate", {}).get("year") or "Unknown"
             ),
-            "description": clean_html(item.get("description", "")),
-            "poster_link": item.get("coverImage", {}).get("large"),
+            "description": clean_html(
+                item.get("description", "")
+            ),
+            "poster_link": (
+                item.get("coverImage", {}).get("extraLarge")
+                or item.get("coverImage", {}).get("large")
+            ),
+            "poster_fallback_link": (
+                item.get("coverImage", {}).get("large")
+            ),
             "backdrop_link": item.get("bannerImage"),
             "genres": item.get("genres", []),
         }
