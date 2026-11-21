@@ -1,10 +1,10 @@
 
 import { API_BASE_URL } from "../../../../services/api/api";
 
+
 import {
     Application,
     Container,
-    DisplacementFilter,
     Graphics,
     Rectangle,
     Sprite,
@@ -21,11 +21,12 @@ type ImageLayer = {
     scale: number;
 };
 
-type Fragment = {
+type Panel = {
     sprite: Sprite;
     texture: Texture;
     targetX: number;
     targetY: number;
+    index: number;
 };
 
 export default class AnimeTransitionEngine {
@@ -35,25 +36,23 @@ export default class AnimeTransitionEngine {
 
     private imageLayer = new Container();
 
-    private fragmentLayer = new Container();
+    private panelLayer = new Container();
 
-    private chromeLayer = new Container();
+    private effectLayer = new Container();
 
     private currentImage: ImageLayer | null = null;
 
     private pendingImage: ImageLayer | null = null;
 
-    private displacementSprite: Sprite | null = null;
-
-    private displacementFilter: DisplacementFilter | null = null;
-
     private timeline: gsap.core.Timeline | null = null;
 
     private resizeObserver: ResizeObserver | null = null;
 
-    private fragments: Fragment[] = [];
+    private panels: Panel[] = [];
 
-    private chromeStreaks: Graphics[] = [];
+    private effectGraphics: Graphics[] = [];
+
+    private ghostSprites: Sprite[] = [];
 
     private initialized = false;
 
@@ -109,12 +108,9 @@ export default class AnimeTransitionEngine {
 
         app.ticker.stop();
 
-        // The displacement map sits behind the actual artwork.
-        this.createDisplacement();
-
         app.stage.addChild(this.imageLayer);
-        app.stage.addChild(this.fragmentLayer);
-        app.stage.addChild(this.chromeLayer);
+        app.stage.addChild(this.panelLayer);
+        app.stage.addChild(this.effectLayer);
 
         const texture = await this.loadImage(initialImage);
 
@@ -149,6 +145,10 @@ export default class AnimeTransitionEngine {
 
         app.render();
     }
+
+    // --------------------------------------------------
+    // IMAGE LOADING
+    // --------------------------------------------------
 
     private async loadImage(url: string): Promise<Texture> {
         if (!url) {
@@ -197,119 +197,6 @@ export default class AnimeTransitionEngine {
     }
 
     // --------------------------------------------------
-    // LIQUID CHROME DISPLACEMENT
-    // --------------------------------------------------
-
-    private createDisplacement(): void {
-        const size = 512;
-
-        const canvas = document.createElement("canvas");
-
-        canvas.width = size;
-        canvas.height = size;
-
-        const context = canvas.getContext("2d");
-
-        if (!context) {
-            console.warn(
-                "Anime transition: Could not create displacement map."
-            );
-            return;
-        }
-
-        const imageData = context.createImageData(size, size);
-        const data = imageData.data;
-
-        for (let y = 0; y < size; y++) {
-            for (let x = 0; x < size; x++) {
-                const index = (y * size + x) * 4;
-
-                const nx = x / size;
-                const ny = y / size;
-
-                // Broad liquid waves.
-                const waveX =
-                    Math.sin(nx * 15 + Math.sin(ny * 7) * 3.5);
-
-                const waveY =
-                    Math.cos(ny * 13 + Math.sin(nx * 8) * 4);
-
-                // Fine holographic surface detail.
-                const detail =
-                    Math.sin(nx * 29 + ny * 19) *
-                    Math.cos(ny * 25 - nx * 16);
-
-                // Expanding liquid ripple.
-                const radial = Math.sqrt(
-                    (nx - 0.5) ** 2 +
-                    (ny - 0.5) ** 2
-                );
-
-                const ripple = Math.sin(radial * 42);
-
-                data[index] = Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        128 + waveX * 48 + detail * 15 + ripple * 18
-                    )
-                );
-
-                data[index + 1] = Math.max(
-                    0,
-                    Math.min(
-                        255,
-                        128 + waveY * 48 - detail * 15 + ripple * 18
-                    )
-                );
-
-                data[index + 2] = 128;
-                data[index + 3] = 255;
-            }
-        }
-
-        context.putImageData(imageData, 0, 0);
-
-        const displacementTexture = Texture.from(canvas);
-
-        const displacementSprite = new Sprite(displacementTexture);
-
-        displacementSprite.anchor.set(0.5);
-
-        displacementSprite.position.set(
-            this.width / 2,
-            this.height / 2
-        );
-
-        displacementSprite.width = this.width;
-        displacementSprite.height = this.height;
-
-        this.displacementSprite = displacementSprite;
-
-        // Keep the map behind the artwork so it cannot obscure it.
-        this.app?.stage.addChildAt(displacementSprite, 0);
-
-        try {
-            const filter = new DisplacementFilter({
-                sprite: displacementSprite,
-                scale: 0,
-            });
-
-            this.imageLayer.filters = [filter];
-
-            this.displacementFilter = filter;
-        } catch (error) {
-            console.warn(
-                "Anime transition: Displacement filter unavailable. Using fragment transition instead.",
-                error
-            );
-
-            this.displacementFilter = null;
-            this.imageLayer.filters = [];
-        }
-    }
-
-    // --------------------------------------------------
     // RESPONSIVE RESIZING
     // --------------------------------------------------
 
@@ -333,42 +220,31 @@ export default class AnimeTransitionEngine {
             );
         }
 
-        if (this.displacementSprite) {
-            this.displacementSprite.position.set(
-                width / 2,
-                height / 2
-            );
-
-            this.displacementSprite.width = width;
-            this.displacementSprite.height = height;
-        }
-
         this.app.render();
     }
 
     // --------------------------------------------------
-    // FRAGMENT SYSTEM
+    // ANIME PANEL SYSTEM
     // --------------------------------------------------
 
-    private clearFragments(): void {
-        for (const fragment of this.fragments) {
-            this.fragmentLayer.removeChild(fragment.sprite);
+    private clearPanels(): void {
+        for (const panel of this.panels) {
+            this.panelLayer.removeChild(panel.sprite);
 
-            fragment.sprite.destroy();
+            panel.sprite.destroy();
 
-            fragment.texture.destroy(false);
+            panel.texture.destroy(false);
         }
 
-        this.fragments = [];
+        this.panels = [];
     }
 
-    private createFragments(image: ImageLayer): void {
-        this.clearFragments();
+    private createPanels(image: ImageLayer): void {
+        this.clearPanels();
 
-        // Smaller fragments give the transition a more
-        // digital, crystalline appearance.
-        const columns = 12;
-        const rows = 7;
+        // Larger panels instead of tiny floating particles.
+        const columns = 5;
+        const rows = 3;
 
         const textureWidth = image.texture.width;
         const textureHeight = image.texture.height;
@@ -376,22 +252,24 @@ export default class AnimeTransitionEngine {
         const cellWidth = textureWidth / columns;
         const cellHeight = textureHeight / rows;
 
+        let index = 0;
+
         for (let row = 0; row < rows; row++) {
             for (let column = 0; column < columns; column++) {
                 const x = column * cellWidth;
                 const y = row * cellHeight;
 
                 const frameWidth = Math.min(
-                    cellWidth + 1,
+                    Math.ceil(cellWidth + 1),
                     textureWidth - x
                 );
 
                 const frameHeight = Math.min(
-                    cellHeight + 1,
+                    Math.ceil(cellHeight + 1),
                     textureHeight - y
                 );
 
-                const fragmentTexture = new Texture({
+                const panelTexture = new Texture({
                     source: image.texture.source,
                     frame: new Rectangle(
                         x,
@@ -401,10 +279,9 @@ export default class AnimeTransitionEngine {
                     ),
                 });
 
-                const sprite = new Sprite(fragmentTexture);
+                const sprite = new Sprite(panelTexture);
 
                 sprite.anchor.set(0.5);
-
                 sprite.scale.set(image.scale);
 
                 const centerX =
@@ -420,127 +297,202 @@ export default class AnimeTransitionEngine {
 
                 sprite.position.set(targetX, targetY);
 
-                this.fragmentLayer.addChild(sprite);
+                // Slightly angled panels create a manga-panel feel.
+                sprite.skew.x = row % 2 === 0 ? -0.12 : 0.12;
 
-                this.fragments.push({
+                this.panelLayer.addChild(sprite);
+
+                this.panels.push({
                     sprite,
-                    texture: fragmentTexture,
+                    texture: panelTexture,
                     targetX,
                     targetY,
+                    index,
                 });
+
+                index++;
             }
         }
     }
 
     // --------------------------------------------------
-    // HOLOGRAPHIC CHROME SWEEP
+    // ANIME SPEED LINES
     // --------------------------------------------------
 
-    private clearChromeStreaks(): void {
-        for (const streak of this.chromeStreaks) {
-            this.chromeLayer.removeChild(streak);
-            streak.destroy();
+    private createSpeedLines(): Graphics {
+        const lines = new Graphics();
+
+        const lineCount = 42;
+
+        for (let i = 0; i < lineCount; i++) {
+            const y = Math.random() * this.height;
+
+            const startX = Math.random() * this.width * 0.5;
+            const endX = startX + this.width * (0.35 + Math.random() * 0.7);
+
+            const thickness = Math.random() > 0.85 ? 2.5 : 1;
+
+            const color =
+                i % 7 === 0
+                    ? 0x59e7cb
+                    : i % 11 === 0
+                        ? 0xb9a6ff
+                        : 0xffffff;
+
+            lines
+                .moveTo(startX, y)
+                .lineTo(endX, y - this.height * 0.035)
+                .stroke({
+                    color,
+                    width: thickness,
+                    alpha: 0.65 + Math.random() * 0.3,
+                });
         }
 
-        this.chromeStreaks = [];
+        lines.alpha = 0;
+
+        this.effectLayer.addChild(lines);
+        this.effectGraphics.push(lines);
+
+        return lines;
     }
 
-    private createChromeStreaks(): void {
-        this.clearChromeStreaks();
+    // --------------------------------------------------
+    // DIGITAL GLITCH BARS
+    // --------------------------------------------------
 
-        const streakColors = [
-            0xffffff,
-            0x9fffee,
+    private createGlitchBars(): Graphics[] {
+        const colors = [
+            0x59e7cb,
             0xb9a6ff,
-            0xe8faff,
+            0xffffff,
+            0x8b78ff,
         ];
 
-        const streakWidths = [
-            0.055,
-            0.025,
-            0.035,
-            0.012,
-        ];
+        const bars: Graphics[] = [];
 
-        streakColors.forEach((color, index) => {
-            const streakWidth = Math.max(
-                12,
-                this.width * streakWidths[index]
-            );
+        for (let i = 0; i < 12; i++) {
+            const bar = new Graphics();
 
-            const streak = new Graphics();
+            const barHeight = 2 + Math.random() * 13;
+            const barWidth = this.width * (0.12 + Math.random() * 0.55);
 
-            streak
+            bar
                 .rect(
-                    -streakWidth / 2,
-                    -this.height,
-                    streakWidth,
-                    this.height * 2
+                    0,
+                    0,
+                    barWidth,
+                    barHeight
                 )
-                .fill({ color });
+                .fill({
+                    color: colors[i % colors.length],
+                });
 
-            streak.position.set(
-                -this.width * 0.8 - index * 80,
-                this.height / 2
+            bar.position.set(
+                Math.random() * this.width,
+                Math.random() * this.height
             );
 
-            streak.rotation = -0.16;
+            bar.alpha = 0;
 
-            streak.alpha = 0;
+            this.effectLayer.addChild(bar);
+            this.effectGraphics.push(bar);
 
-            this.chromeLayer.addChild(streak);
+            bars.push(bar);
+        }
 
-            this.chromeStreaks.push(streak);
-        });
+        return bars;
     }
 
-    private animateChromeSweep(
-        timeline: gsap.core.Timeline,
-        directionMultiplier: number
+    // --------------------------------------------------
+    // IMPACT FRAME
+    // --------------------------------------------------
+
+    private createImpactFlash(): Graphics {
+        const flash = new Graphics();
+
+        flash
+            .rect(
+                0,
+                0,
+                this.width,
+                this.height
+            )
+            .fill({
+                color: 0xffffff,
+            });
+
+        flash.alpha = 0;
+
+        this.effectLayer.addChild(flash);
+        this.effectGraphics.push(flash);
+
+        return flash;
+    }
+
+    // --------------------------------------------------
+    // CHROMATIC RGB SPLIT
+    // --------------------------------------------------
+
+    private createChromaticGhosts(
+        texture: Texture,
+        scale: number
     ): void {
-        this.createChromeStreaks();
+        this.clearGhosts();
 
-        this.chromeStreaks.forEach((streak, index) => {
-            const startX =
-                -this.width * 0.8 - index * 80;
+        const cyan = new Sprite(texture);
+        const violet = new Sprite(texture);
 
-            const endX =
-                this.width * 1.8 +
-                index * 100;
+        cyan.anchor.set(0.5);
+        violet.anchor.set(0.5);
 
-            const delay = index * 0.075;
+        cyan.scale.set(scale * 1.015);
+        violet.scale.set(scale * 1.015);
 
-            timeline
-                .set(
-                    streak,
-                    {
-                        x: startX,
-                        alpha: 0,
-                    },
-                    0.18 + delay
-                )
-                .to(
-                    streak,
-                    {
-                        x: directionMultiplier === 1
-                            ? endX
-                            : -endX,
-                        alpha: index === 0 ? 0.34 : 0.19,
-                        duration: 0.8,
-                        ease: "power2.inOut",
-                    },
-                    0.18 + delay
-                )
-                .to(
-                    streak,
-                    {
-                        alpha: 0,
-                        duration: 0.35,
-                        ease: "power2.out",
-                    },
-                    0.72 + delay
-                );
-        });
+        cyan.position.set(
+            this.width / 2 - 13,
+            this.height / 2
+        );
+
+        violet.position.set(
+            this.width / 2 + 13,
+            this.height / 2
+        );
+
+        cyan.tint = 0x59e7cb;
+        violet.tint = 0xb99aff;
+
+        cyan.alpha = 0;
+        violet.alpha = 0;
+
+        this.imageLayer.addChild(cyan);
+        this.imageLayer.addChild(violet);
+
+        this.ghostSprites.push(cyan, violet);
+    }
+
+    private clearGhosts(): void {
+        for (const ghost of this.ghostSprites) {
+            this.imageLayer.removeChild(ghost);
+            ghost.destroy();
+        }
+
+        this.ghostSprites = [];
+    }
+
+    // --------------------------------------------------
+    // EFFECT CLEANUP
+    // --------------------------------------------------
+
+    private clearEffects(): void {
+        for (const graphic of this.effectGraphics) {
+            this.effectLayer.removeChild(graphic);
+            graphic.destroy();
+        }
+
+        this.effectGraphics = [];
+
+        this.clearGhosts();
     }
 
     // --------------------------------------------------
@@ -565,8 +517,7 @@ export default class AnimeTransitionEngine {
 
         const incomingTexture = await this.loadImage(url);
 
-        // A newer navigation request may have arrived
-        // while this image was loading.
+        // Ignore outdated image requests.
         if (
             this.destroyed ||
             thisRequest !== this.requestId
@@ -591,6 +542,13 @@ export default class AnimeTransitionEngine {
 
         this.transitioning = true;
 
+        const directionMultiplier =
+            direction === "next" ? 1 : -1;
+
+        // --------------------------------------------------
+        // INCOMING ARTWORK
+        // --------------------------------------------------
+
         const incomingSprite = new Sprite(incomingTexture);
 
         incomingSprite.anchor.set(0.5);
@@ -603,7 +561,7 @@ export default class AnimeTransitionEngine {
             incomingTexture
         );
 
-        incomingSprite.scale.set(incomingScale * 1.075);
+        incomingSprite.scale.set(incomingScale * 1.12);
 
         this.pendingImage = {
             sprite: incomingSprite,
@@ -611,36 +569,45 @@ export default class AnimeTransitionEngine {
             scale: incomingScale,
         };
 
-        this.createFragments(outgoing);
+        // --------------------------------------------------
+        // OUTGOING PANELS
+        // --------------------------------------------------
+
+        this.createPanels(outgoing);
 
         outgoing.sprite.alpha = 0;
 
-        const displacement = this.displacementFilter;
-        const displacementSprite = this.displacementSprite;
+        // --------------------------------------------------
+        // TRANSITION EFFECTS
+        // --------------------------------------------------
 
-        if (displacement && displacementSprite) {
-            displacementSprite.alpha = 1;
+        const speedLines = this.createSpeedLines();
 
-            displacementSprite.position.set(
-                this.width / 2,
-                this.height / 2
-            );
-        }
+        const glitchBars = this.createGlitchBars();
 
-        const directionMultiplier =
-            direction === "next" ? 1 : -1;
+        const impactFlash = this.createImpactFlash();
+
+        this.createChromaticGhosts(
+            incomingTexture,
+            incomingScale
+        );
+
+        const [cyanGhost, violetGhost] = this.ghostSprites;
 
         const timeline = gsap.timeline({
             onComplete: () => {
                 if (this.destroyed) return;
 
+                // Remove the outgoing artwork.
                 this.imageLayer.removeChild(outgoing.sprite);
+
                 outgoing.sprite.destroy();
                 outgoing.texture.destroy(true);
 
-                this.clearFragments();
-                this.clearChromeStreaks();
+                this.clearPanels();
+                this.clearEffects();
 
+                // Settle the incoming artwork.
                 incomingSprite.alpha = 1;
 
                 incomingSprite.scale.set(incomingScale);
@@ -657,17 +624,7 @@ export default class AnimeTransitionEngine {
                 };
 
                 this.pendingImage = null;
-
                 this.currentUrl = url;
-
-                if (displacement) {
-                    displacement.scale.set(0, 0);
-                }
-
-                if (displacementSprite) {
-                    displacementSprite.alpha = 0;
-                    displacementSprite.rotation = 0;
-                }
 
                 this.transitioning = false;
                 this.timeline = null;
@@ -681,129 +638,315 @@ export default class AnimeTransitionEngine {
 
         this.app?.ticker.start();
 
-        // Liquid chrome distortion.
-        if (displacement) {
-            timeline
-                .to(
-                    displacement.scale,
-                    {
-                        x: directionMultiplier * 115,
-                        y: 75,
-                        duration: 0.62,
-                        ease: "power3.inOut",
-                    },
-                    0
-                )
-                .to(
-                    displacement.scale,
-                    {
-                        x: directionMultiplier * 165,
-                        y: -95,
-                        duration: 0.48,
-                        ease: "power2.inOut",
-                    },
-                    0.4
-                )
-                .to(
-                    displacement.scale,
-                    {
-                        x: 0,
-                        y: 0,
-                        duration: 0.7,
-                        ease: "power3.out",
-                    },
-                    1.05
-                );
-        }
+        // --------------------------------------------------
+        // PHASE 1 — SNAP / PRE-IMPACT
+        // --------------------------------------------------
 
-        if (displacementSprite) {
-            timeline.to(
-                displacementSprite,
-                {
-                    rotation: directionMultiplier * Math.PI * 0.5,
-                    duration: 1.15,
-                    ease: "power2.inOut",
-                },
-                0
-            );
-        }
-
-        // Incoming image reveal.
         timeline
+            .to(outgoing.sprite.scale, {
+  x: outgoing.scale * 1.035,
+  y: outgoing.scale * 1.035,
+  duration: 0.32,
+  ease: "power2.in",
+}, 0)
             .to(
                 incomingSprite,
                 {
                     alpha: 1,
-                    duration: 0.9,
+                    duration: 0.22,
+                    ease: "power1.out",
+                },
+                0.16
+            );
+
+        // --------------------------------------------------
+        // PHASE 2 — ANIME PANEL BREAK
+        // --------------------------------------------------
+
+        for (const panel of this.panels) {
+            const row = Math.floor(panel.index / 5);
+            const column = panel.index % 5;
+
+            const alternatingDirection =
+                (row + column) % 2 === 0 ? 1 : -1;
+
+            const delay =
+                row * 0.035 +
+                Math.random() * 0.08;
+
+            const travelX =
+                directionMultiplier *
+                this.width *
+                (0.42 + Math.random() * 0.3);
+
+            const travelY =
+                alternatingDirection *
+                this.height *
+                (0.08 + Math.random() * 0.16);
+
+            timeline
+                .to(
+                    panel.sprite,
+                    {
+                        x: panel.targetX + travelX,
+                        y: panel.targetY + travelY,
+                        rotation:
+                            directionMultiplier *
+                            alternatingDirection *
+                            (0.12 + Math.random() * 0.2),
+                        alpha: 0,
+                        duration: 0.38 + Math.random() * 0.16,
+                        ease: "power4.in",
+                    },
+                    0.04 + delay
+                )
+                .to(
+                    panel.sprite.scale,
+                    {
+                        x: outgoing.scale * 0.82,
+                        y: outgoing.scale * 0.82,
+                        duration: 0.42,
+                        ease: "power3.in",
+                    },
+                    0.04 + delay
+                );
+        }
+
+        // --------------------------------------------------
+        // PHASE 3 — SPEED LINES
+        // --------------------------------------------------
+
+        speedLines.x =
+            directionMultiplier === 1
+                ? -this.width * 0.5
+                : this.width * 0.5;
+
+        timeline
+            .to(
+                speedLines,
+                {
+                    alpha: 1,
+                    duration: 0.1,
+                    ease: "power1.out",
+                },
+                0.12
+            )
+            .to(
+                speedLines,
+                {
+                    x:
+                        directionMultiplier === 1
+                            ? this.width * 0.65
+                            : -this.width * 0.65,
+                    duration: 0.55,
+                    ease: "power4.in",
+                },
+                0.12
+            )
+            .to(
+                speedLines,
+                {
+                    alpha: 0,
+                    duration: 0.18,
                     ease: "power2.out",
                 },
-                0.34
+                0.53
+            );
+
+        // --------------------------------------------------
+        // PHASE 4 — IMPACT FRAME
+        // --------------------------------------------------
+
+        timeline
+            .set(
+                impactFlash,
+                { alpha: 0 },
+                0.32
+            )
+            .to(
+                impactFlash,
+                {
+                    alpha: 0.92,
+                    duration: 0.045,
+                    ease: "none",
+                },
+                0.32
+            )
+            .to(
+                impactFlash,
+                {
+                    alpha: 0,
+                    duration: 0.17,
+                    ease: "power2.out",
+                },
+                0.365
+            )
+            .to(
+                impactFlash,
+                {
+                    alpha: 0.42,
+                    duration: 0.035,
+                    ease: "none",
+                },
+                0.55
+            )
+            .to(
+                impactFlash,
+                {
+                    alpha: 0,
+                    duration: 0.13,
+                    ease: "power2.out",
+                },
+                0.585
+            );
+
+        // --------------------------------------------------
+        // PHASE 5 — DIGITAL GLITCH
+        // --------------------------------------------------
+
+        glitchBars.forEach((bar ) => {
+            const startX =
+                Math.random() * this.width * 0.7;
+
+            const endX =
+                directionMultiplier === 1
+                    ? this.width + this.width * 0.4
+                    : -this.width * 0.4;
+
+            const delay = 0.27 + Math.random() * 0.3;
+
+            timeline
+                .set(
+                    bar,
+                    {
+                        x: startX,
+                        alpha: 0,
+                    },
+                    delay
+                )
+                .to(
+                    bar,
+                    {
+                        x: endX,
+                        alpha: 0.65 + Math.random() * 0.3,
+                        duration: 0.08 + Math.random() * 0.1,
+                        ease: "none",
+                    },
+                    delay
+                )
+                .to(
+                    bar,
+                    {
+                        alpha: 0,
+                        duration: 0.12,
+                        ease: "power1.out",
+                    },
+                    delay + 0.1
+                );
+        });
+
+        // --------------------------------------------------
+        // PHASE 6 — RGB SPLIT
+        // --------------------------------------------------
+
+        if (cyanGhost && violetGhost) {
+            timeline
+                .to(
+                    cyanGhost,
+                    {
+                        alpha: 0.38,
+                        x: this.width / 2 - 25,
+                        duration: 0.09,
+                        ease: "none",
+                    },
+                    0.32
+                )
+                .to(
+                    violetGhost,
+                    {
+                        alpha: 0.38,
+                        x: this.width / 2 + 25,
+                        duration: 0.09,
+                        ease: "none",
+                    },
+                    0.32
+                )
+                .to(
+                    cyanGhost,
+                    {
+                        alpha: 0,
+                        x: this.width / 2,
+                        duration: 0.28,
+                        ease: "power3.out",
+                    },
+                    0.43
+                )
+                .to(
+                    violetGhost,
+                    {
+                        alpha: 0,
+                        x: this.width / 2,
+                        duration: 0.28,
+                        ease: "power3.out",
+                    },
+                    0.43
+                );
+        }
+
+        // --------------------------------------------------
+        // PHASE 7 — NEW ARTWORK LOCK-IN
+        // --------------------------------------------------
+
+        timeline
+            .fromTo(
+                incomingSprite.scale,
+                {
+                    x: incomingScale * 1.12,
+                    y: incomingScale * 1.12,
+                },
+                {
+                    x: incomingScale,
+                    y: incomingScale,
+                    duration: 0.78,
+                    ease: "expo.out",
+                },
+                0.2
+            )
+            .fromTo(
+                incomingSprite,
+                {
+                    rotation: directionMultiplier * 0.012,
+                },
+                {
+                    rotation: 0,
+                    duration: 0.62,
+                    ease: "power3.out",
+                },
+                0.35
+            );
+
+        // A short final snap gives the new artwork a decisive landing.
+        timeline
+            .to(
+                incomingSprite.scale,
+                {
+                    x: incomingScale * 1.012,
+                    y: incomingScale * 1.012,
+                    duration: 0.09,
+                    ease: "power2.out",
+                },
+                0.78
             )
             .to(
                 incomingSprite.scale,
                 {
                     x: incomingScale,
                     y: incomingScale,
-                    duration: 1.2,
+                    duration: 0.18,
                     ease: "power3.out",
                 },
-                0.2
+                0.87
             );
-
-        // Holographic sweep across the transition.
-        this.animateChromeSweep(
-            timeline,
-            directionMultiplier
-        );
-
-        // Digital fragments disperse from the outgoing image.
-        for (const fragment of this.fragments) {
-            const random = Math.random();
-
-            const scatterX =
-                (random - 0.5) *
-                this.width *
-                0.7;
-
-            const scatterY =
-                (Math.random() - 0.5) *
-                this.height *
-                0.65;
-
-            const rotation =
-                (Math.random() - 0.5) *
-                Math.PI *
-                1.25;
-
-            const delay = Math.random() * 0.3;
-
-            timeline
-                .to(
-                    fragment.sprite,
-                    {
-                        x:
-                            fragment.targetX +
-                            scatterX +
-                            directionMultiplier * this.width * 0.1,
-                        y: fragment.targetY + scatterY,
-                        rotation,
-                        alpha: 0,
-                        duration: 0.9 + Math.random() * 0.25,
-                        ease: "power3.in",
-                    },
-                    0.03 + delay
-                )
-                .to(
-                    fragment.sprite.scale,
-                    {
-                        x: outgoing.scale * 0.68,
-                        y: outgoing.scale * 0.68,
-                        duration: 0.9,
-                        ease: "power2.in",
-                    },
-                    0.03 + delay
-                );
-        }
     }
 
     // --------------------------------------------------
@@ -821,11 +964,9 @@ export default class AnimeTransitionEngine {
         const previous = this.currentImage;
 
         this.imageLayer.removeChild(previous.sprite);
+
         previous.sprite.destroy();
         previous.texture.destroy(true);
-
-        this.clearFragments();
-        this.clearChromeStreaks();
 
         const sprite = new Sprite(texture);
 
@@ -847,15 +988,15 @@ export default class AnimeTransitionEngine {
     }
 
     // --------------------------------------------------
-    // TRANSITION CLEANUP
+    // TRANSITION CANCELLATION
     // --------------------------------------------------
 
     private cancelActiveTransition(): void {
         this.timeline?.kill();
         this.timeline = null;
 
-        this.clearFragments();
-        this.clearChromeStreaks();
+        this.clearPanels();
+        this.clearEffects();
 
         if (this.pendingImage) {
             this.imageLayer.removeChild(
@@ -870,13 +1011,11 @@ export default class AnimeTransitionEngine {
 
         if (this.currentImage) {
             this.currentImage.sprite.alpha = 1;
-        }
+            this.currentImage.sprite.rotation = 0;
 
-        this.displacementFilter?.scale.set(0, 0);
-
-        if (this.displacementSprite) {
-            this.displacementSprite.alpha = 0;
-            this.displacementSprite.rotation = 0;
+            this.currentImage.sprite.scale.set(
+                this.currentImage.scale
+            );
         }
 
         this.transitioning = false;
@@ -891,7 +1030,7 @@ export default class AnimeTransitionEngine {
 
         this.destroyed = true;
 
-        // Invalidate any image requests still loading.
+        // Invalidate pending image requests.
         this.requestId++;
 
         this.timeline?.kill();
@@ -900,29 +1039,27 @@ export default class AnimeTransitionEngine {
         this.resizeObserver?.disconnect();
         this.resizeObserver = null;
 
-        this.clearFragments();
-        this.clearChromeStreaks();
+        this.clearPanels();
+        this.clearEffects();
 
         if (this.pendingImage) {
             this.pendingImage.sprite.destroy();
             this.pendingImage.texture.destroy(true);
+
             this.pendingImage = null;
         }
 
         if (this.currentImage) {
             this.currentImage.sprite.destroy();
             this.currentImage.texture.destroy(true);
+
             this.currentImage = null;
         }
 
         this.app?.ticker.stop();
-
         this.app?.destroy();
 
         this.app = null;
-
-        this.displacementFilter = null;
-        this.displacementSprite = null;
 
         this.container.replaceChildren();
 
