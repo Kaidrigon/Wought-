@@ -23,7 +23,7 @@ from utils import (
     proxy_image_url,
     format_anilist_item,
 )
-
+ANILIST_API_URL = "https://graphql.anilist.co"
 router = APIRouter()
 
 
@@ -818,3 +818,154 @@ async def trending_anime(page: int = 1):
         }
         for item in media_list
     ]
+
+@router.get("/now-airing/anime")
+async def now_airing_anime(page: int = 1):
+    query = """
+    query ($page: Int) {
+        Page(page: $page, perPage: 20) {
+            pageInfo {
+                currentPage
+                hasNextPage
+                total
+            }
+            media(
+                type: ANIME
+                format: TV
+                status: RELEASING
+                sort: POPULARITY_DESC
+            ) {
+                id
+
+                title {
+                    romaji
+                    english
+                    native
+                }
+
+                description(asHtml: false)
+
+                coverImage {
+                    extraLarge
+                    large
+                }
+
+                bannerImage
+
+                genres
+                averageScore
+                episodes
+
+                season
+                seasonYear
+
+                nextAiringEpisode {
+                    episode
+                    airingAt
+                    timeUntilAiring
+                }
+            }
+        }
+    }
+    """
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.post(
+                ANILIST_API_URL,
+                json={
+                    "query": query,
+                    "variables": {
+                        "page": page
+                    }
+                }
+            )
+
+            response.raise_for_status()
+            payload = response.json()
+
+        if "errors" in payload:
+            raise HTTPException(
+                status_code=502,
+                detail="AniList returned an error."
+            )
+
+        page_data = payload["data"]["Page"]
+
+        results = []
+
+        for anime in page_data["media"]:
+            next_episode = anime.get("nextAiringEpisode")
+
+            # Skip entries without a scheduled next episode.
+            if not next_episode:
+                continue
+
+            title_data = anime.get("title") or {}
+            cover = anime.get("coverImage") or {}
+
+            title = (
+                title_data.get("english")
+                or title_data.get("romaji")
+                or title_data.get("native")
+                or "Unknown Anime"
+            )
+
+            results.append({
+                "anilist_id": anime["id"],
+                "media_type": "tv",
+
+                "title": title,
+
+                "release_date": (
+                    str(anime.get("seasonYear") or "")
+                ),
+
+                "description": anime.get("description") or "",
+
+                "poster_link": (
+                    cover.get("extraLarge")
+                    or cover.get("large")
+                ),
+
+                "backdrop_link": anime.get("bannerImage"),
+
+                "genres": anime.get("genres") or [],
+
+                "average_score": anime.get("averageScore"),
+
+                "total_episodes": anime.get("episodes"),
+
+                "season": anime.get("season"),
+                "season_year": anime.get("seasonYear"),
+
+                "next_episode": next_episode["episode"],
+
+                "airing_at": next_episode["airingAt"],
+
+                "time_until_airing": (
+                    next_episode["timeUntilAiring"]
+                ),
+            })
+
+        return {
+            "results": results,
+            "current_page": page_data["pageInfo"]["currentPage"],
+            "total_results": page_data["pageInfo"]["total"],
+            "has_next_page": page_data["pageInfo"]["hasNextPage"],
+        }
+
+    except HTTPException:
+        raise
+
+    except httpx.HTTPError:
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to connect to AniList."
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to retrieve airing anime: {str(e)}"
+        )
