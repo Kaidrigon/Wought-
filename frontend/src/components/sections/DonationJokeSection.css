@@ -1,69 +1,45 @@
+
 .donation-joke {
     position: relative;
-
     display: flex;
-
     align-items: center;
     justify-content: space-between;
 
-    width: min(
-        calc(100% - 6rem),
-        120rem
-    );
-
+    width: min(calc(100% - 6rem), 120rem);
     min-height: 10rem;
-
-    margin:
-        1.5rem
-        auto
-        0;
-
-    padding:
-        1.75rem
-        2rem;
+    margin: 1.5rem auto 0;
+    padding: 1.75rem 2rem;
 
     overflow: hidden;
 
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
+    border: 1px solid rgba(255,255,255,.08);
     border-radius: .75rem;
 
-    background:
-        linear-gradient(
-            110deg,
-            rgba(255,255,255,.055),
-            rgba(255,255,255,.018)
-        );
+    background: linear-gradient(
+        110deg,
+        rgba(255,255,255,.055),
+        rgba(255,255,255,.018)
+    );
 
-    box-shadow:
-        0 1rem 3rem
-        rgba(0,0,0,.18);
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.18);
 }
 
 .donation-joke::before {
     content: "";
-
     position: absolute;
-
     top: 0;
     left: 0;
 
     width: .18rem;
     height: 100%;
 
-    background:
-        var(--accent);
-
+    background: var(--accent);
     opacity: .8;
 }
 
 .donation-joke__content {
     position: relative;
-
     max-width: 50rem;
-
     z-index: 1;
 }
 
@@ -72,7 +48,6 @@
 
     font-size: .58rem;
     font-weight: 800;
-
     letter-spacing: .17em;
 
     color: var(--accent);
@@ -81,12 +56,7 @@
 .donation-joke__title {
     margin: 0;
 
-    font-size: clamp(
-        1rem,
-        1.5vw,
-        1.35rem
-    );
-
+    font-size: clamp(1rem, 1.5vw, 1.35rem);
     line-height: 1.25;
 
     color: var(--text-primary);
@@ -94,40 +64,27 @@
 
 .donation-joke__text {
     max-width: 38rem;
-
-    margin:
-        .5rem
-        0
-        1rem;
+    margin: .5rem 0 1rem;
 
     font-size: .78rem;
-
     line-height: 1.55;
 
     color: var(--text-secondary);
 }
 
 .donation-joke__button {
-    padding:
-        .55rem
-        .8rem;
+    padding: .55rem .8rem;
 
-    border:
-        1px solid
-        rgba(255,255,255,.14);
-
+    border: 1px solid rgba(255,255,255,.14);
     border-radius: .3rem;
 
-    background:
-        rgba(255,255,255,.055);
+    background: rgba(255,255,255,.055);
 
     font-size: .6rem;
     font-weight: 800;
-
     letter-spacing: .11em;
 
     color: var(--text-primary);
-
     cursor: pointer;
 
     transition:
@@ -137,88 +94,108 @@
 }
 
 .donation-joke__button:hover {
-    background:
-        rgba(255,255,255,.1);
-
-    border-color:
-        rgba(255,255,255,.25);
-
-    transform:
-        translateY(-1px);
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.25);
+    transform: translateY(-1px);
 }
 
 .donation-joke__stamp {
     position: absolute;
-
     right: 2rem;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
     width: 4rem;
     height: 4rem;
 
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
+    border: 1px solid rgba(255,255,255,.08);
     border-radius: 50%;
 
     font-size: 1rem;
     font-weight: 900;
-
     letter-spacing: .05em;
 
-    color:
-        rgba(255,255,255,.16);
-
-    transform:
-        rotate(-12deg);
+    color: rgba(255,255,255,.16);
+    transform: rotate(-12deg);
 }
 
 /* ================================================= */
-/* RESPONSIVE                                         */
+/* ANIME VARIANT                                     */
+/* ================================================= */
+
+.donation-joke--anime {
+    border-color: rgba(89,231,203,.16);
+
+    background: linear-gradient(
+        110deg,
+        rgba(89,231,203,.075),
+        rgba(89,231,203,.018) 55%,
+        rgba(255,255,255,.012)
+    );
+
+    box-shadow:
+        0 1rem 3rem rgba(0,0,0,.2),
+        inset 0 0 2rem rgba(89,231,203,.025);
+}
+
+.donation-joke--anime::before {
+    background: linear-gradient(
+        180deg,
+        #7EF0D9,
+        #59E7CB,
+        rgba(89,231,203,.25)
+    );
+
+    box-shadow: 0 0 1rem rgba(89,231,203,.35);
+}
+
+.donation-joke--anime .donation-joke__stamp {
+    border-color: rgba(89,231,203,.2);
+    color: rgba(89,231,203,.25);
+    box-shadow: 0 0 1.5rem rgba(89,231,203,.06);
+}
+
+.donation-joke--anime .donation-joke__button {
+    border-color: rgba(89,231,203,.25);
+    background: rgba(89,231,203,.07);
+}
+
+.donation-joke--anime .donation-joke__button:hover {
+    border-color: rgba(89,231,203,.5);
+    background: rgba(89,231,203,.14);
+    box-shadow: 0 0 .9rem rgba(89,231,203,.08);
+}
+
+/* ================================================= */
+/* RESPONSIVE                                        */
 /* ================================================= */
 
 @media (max-width: 768px) {
-
     .donation-joke {
-        width:
-            calc(100% - 2.5rem);
-
+        width: calc(100% - 2.5rem);
         min-height: auto;
-
         margin-top: 1rem;
-
-        padding:
-            1.35rem
-            1.25rem;
+        padding: 1.35rem 1.25rem;
     }
 
     .donation-joke__stamp {
         right: 1rem;
-
         width: 3rem;
         height: 3rem;
-
         font-size: .8rem;
     }
 
     .donation-joke__text {
         max-width: 85%;
-
         font-size: .72rem;
     }
-
 }
 
 @media (max-width: 480px) {
-
     .donation-joke {
-        width:
-            calc(100% - 2rem);
+        width: calc(100% - 2rem);
     }
 
     .donation-joke__stamp {
@@ -228,5 +205,4 @@
     .donation-joke__text {
         max-width: 100%;
     }
-
 }

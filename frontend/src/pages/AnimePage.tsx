@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import useAnimeTrending from "../hooks/anime/useAnimeTrending";
 import AnimeHero from "../components/anime/hero/AnimeHero";
+import DonationJokeSection from "../components/sections/DonationJokeSection";
 
 import "./AnimePage.css";
 
@@ -92,6 +92,8 @@ export default function AnimePage() {
                 onPrevious={previousAnime}
                 onNext={nextAnime}
             />
+
+            <DonationJokeSection variant="anime" />
         </main>
     );
 }

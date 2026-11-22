@@ -1,5 +1,5 @@
 import re
-
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 
 from auth import create_token_for_user, get_current_user
@@ -102,59 +102,170 @@ async def clear_favorites(current_user=Depends(get_current_user)):
     result = await favorites_collection.delete_many({"user_id": current_user["_id"]})
     return {"message": "Favorites cleared", "deleted": result.deleted_count}
 
-
 @router.post("/progress")
-async def save_progress(progress: ProgressRequest, current_user=Depends(get_current_user)):
-    progress_percent = (progress.current_time / progress.duration) if progress.duration > 0 else 0
+async def save_progress(
+    progress: ProgressRequest,
+    current_user=Depends(get_current_user),
+):
+    progress_percent = (
+        progress.current_time / progress.duration
+        if progress.duration > 0
+        else 0
+    )
+
     if progress_percent < 0.05:
         return {"message": "Progress too small to save."}
 
-    if progress_percent >= 0.95:
+    # Separate anime and cinema records.
+    identity = {
+        "user_id": current_user["_id"],
+        "media_id": progress.media_id,
+        "media_source": progress.media_source,
+    }
+
+    # Determine whether this completion finishes the entire anime.
+    is_anime_series = (
+        progress.media_source == "anime"
+        and progress.media_type == "tv"
+    )
+
+    is_final_anime_episode = (
+        is_anime_series
+        and progress.episode is not None
+        and progress.total_episodes is not None
+        and progress.episode >= progress.total_episodes
+    )
+
+    is_completed = progress_percent >= 0.95
+
+    if is_completed:
+        # An anime series episode can finish without the entire series
+        # being completed. Advance its saved position to the next episode.
+        if is_anime_series and not is_final_anime_episode:
+            next_episode = (
+                progress.episode + 1
+                if progress.episode is not None
+                else 1
+            )
+
+            await progress_collection.update_one(
+                identity,
+                {
+                    "$set": {
+                        "media_type": progress.media_type,
+                        "media_source": progress.media_source,
+                        "title": progress.title,
+                        "poster": progress.poster,
+                        "episode": next_episode,
+                        "season": progress.season,
+                        "total_episodes": progress.total_episodes,
+                        "current_time": 0,
+                        "duration": 0,
+                        "updated_at": None,
+                    }
+                },
+                upsert=True,
+            )
+
+            return {
+                "message": "Anime episode completed. Next episode saved.",
+                "next_episode": next_episode,
+            }
+
+        # Movies, cinema episodes, and final anime episodes go to history.
         await history_collection.update_one(
-            {"user_id": current_user["_id"], "media_id": progress.media_id},
+            identity,
             {
                 "$set": {
                     "media_type": progress.media_type,
+                    "media_source": progress.media_source,
                     "title": progress.title,
                     "poster": progress.poster,
+                    "episode": progress.episode,
+                    "season": progress.season,
                     "completed_at": None,
                 }
             },
             upsert=True,
         )
-        await progress_collection.delete_one(
-            {"user_id": current_user["_id"], "media_id": progress.media_id}
-        )
-        return {"message": "Movie added to Watch History."}
 
+        await progress_collection.delete_one(identity)
+
+        return {
+            "message": "Content added to Watch History."
+        }
+
+    # Normal playback progress.
     await progress_collection.update_one(
-        {"user_id": current_user["_id"], "media_id": progress.media_id},
+        identity,
         {
             "$set": {
                 "media_type": progress.media_type,
+                "media_source": progress.media_source,
                 "title": progress.title,
                 "poster": progress.poster,
                 "current_time": progress.current_time,
                 "duration": progress.duration,
+                "episode": progress.episode,
+                "season": progress.season,
+                "total_episodes": progress.total_episodes,
                 "updated_at": None,
             }
         },
         upsert=True,
     )
-    return {"message": "Progress saved"}
+
+    return {"message": "Progress saved."}
 
 
 @router.get("/progress")
-async def get_progress(current_user=Depends(get_current_user)):
-    progress = await progress_collection.find({"user_id": current_user["_id"]}).to_list(length=100)
+async def get_progress(
+    media_source: Literal["anime", "cinema"] | None = None,
+    current_user=Depends(get_current_user),
+):
+    query = {
+        "user_id": current_user["_id"],
+    }
+
+    if media_source == "anime":
+        query["media_source"] = "anime"
+
+    elif media_source == "cinema":
+        # Older cinema records may not have media_source.
+        query["$or"] = [
+            {"media_source": "cinema"},
+            {"media_source": {"$exists": False}},
+        ]
+
+    progress = await progress_collection.find(
+        query
+    ).sort("updated_at", -1).to_list(length=100)
+
     return normalize_mongo_docs(progress)
 
-
 @router.get("/history")
-async def get_history(current_user=Depends(get_current_user)):
-    history = await history_collection.find({"user_id": current_user["_id"]}).sort("completed_at", -1).to_list(length=100)
-    return normalize_mongo_docs(history)
+async def get_history(
+    media_source: Literal["anime", "cinema"] | None = None,
+    current_user=Depends(get_current_user),
+):
+    query = {
+        "user_id": current_user["_id"],
+    }
 
+    if media_source == "anime":
+        query["media_source"] = "anime"
+
+    elif media_source == "cinema":
+        query["$or"] = [
+            {"media_source": "cinema"},
+            {"media_source": {"$exists": False}},
+        ]
+
+    history = await history_collection.find(
+        query
+    ).sort("completed_at", -1).to_list(length=100)
+
+    return normalize_mongo_docs(history)
 
 @router.get("/opening/seen/{media_type}/{media_id}")
 async def has_opening_seen(media_type: str, media_id: str, current_user=Depends(get_current_user)):

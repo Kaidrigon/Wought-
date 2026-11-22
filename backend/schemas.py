@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Literal
 
 class RegisterRequest(BaseModel):
     username: str
@@ -20,8 +21,17 @@ class ProgressRequest(BaseModel):
     media_type: str
     title: str
     poster: str | None = None
+
     current_time: int
     duration: int
+
+    # Missing value means cinema, preserving existing WatchPage requests.
+    media_source: Literal["cinema", "anime"] = "cinema"
+
+    # Anime-specific information.
+    episode: int | None = None
+    season: int | None = None
+    total_episodes: int | None = None
 
 class OpeningSeenRequest(BaseModel):
     media_id: str
