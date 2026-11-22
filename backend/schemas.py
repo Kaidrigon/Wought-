@@ -24,6 +24,7 @@ class ProgressRequest(BaseModel):
 
     current_time: int
     duration: int
+    completed: bool = False
 
     # Missing value means cinema, preserving existing WatchPage requests.
     media_source: Literal["cinema", "anime"] = "cinema"

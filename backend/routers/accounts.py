@@ -136,7 +136,7 @@ async def save_progress(
         and progress.episode >= progress.total_episodes
     )
 
-    is_completed = progress_percent >= 0.95
+    is_completed = progress.completed or progress_percent >= 0.95
 
     if is_completed:
         # An anime series episode can finish without the entire series
