@@ -1,14 +1,17 @@
+
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import useAnimeTrending from "../hooks/anime/useAnimeTrending";
 import AnimeHero from "../components/anime/hero/AnimeHero";
+import AnimeContinueWatching from "../components/anime/continue-watching/AnimeContinueWatching";
 import DonationJokeSection from "../components/sections/DonationJokeSection";
 
 import "./AnimePage.css";
 
 export default function AnimePage() {
     const { anime, loading, error } = useAnimeTrending();
+
     const [activeIndex, setActiveIndex] = useState(0);
 
     const featuredAnime = anime.filter(
@@ -24,13 +27,17 @@ export default function AnimePage() {
 
     const previousAnime = () => {
         setActiveIndex((current) =>
-            current === 0 ? featuredAnime.length - 1 : current - 1
+            current === 0
+                ? featuredAnime.length - 1
+                : current - 1
         );
     };
 
     const nextAnime = () => {
         setActiveIndex((current) =>
-            current === featuredAnime.length - 1 ? 0 : current + 1
+            current === featuredAnime.length - 1
+                ? 0
+                : current + 1
         );
     };
 
@@ -38,8 +45,14 @@ export default function AnimePage() {
         return (
             <main className="anime-home anime-home--loading">
                 <div className="anime-home__loader">
-                    <span className="anime-home__loader-mark">W+</span>
-                    <span>CONNECTING TO ANIMATION DIVISION</span>
+                    <span className="anime-home__loader-mark">
+                        W+
+                    </span>
+
+                    <span>
+                        CONNECTING TO ANIMATION DIVISION
+                    </span>
+
                     <div className="anime-home__loader-line" />
                 </div>
             </main>
@@ -55,6 +68,7 @@ export default function AnimePage() {
                     </span>
 
                     <h1>Something interrupted the signal.</h1>
+
                     <p>{error}</p>
 
                     <button
@@ -77,7 +91,10 @@ export default function AnimePage() {
                     </span>
 
                     <h1>No transmissions found.</h1>
-                    <p>There is currently nothing to display.</p>
+
+                    <p>
+                        There is currently nothing to display.
+                    </p>
                 </div>
             </main>
         );
@@ -94,6 +111,8 @@ export default function AnimePage() {
             />
 
             <DonationJokeSection variant="anime" />
+
+            <AnimeContinueWatching />
         </main>
     );
 }

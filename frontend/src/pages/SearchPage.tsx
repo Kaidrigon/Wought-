@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import {
+    useLocation,
     useNavigate,
 } from "react-router-dom";
 
@@ -50,12 +51,13 @@ type FilterState = {
 
 export default function SearchPage() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const { section } = useTheme();
 
     const isAnime =
-    section === "anime" ||
-    location.pathname.startsWith("/anime/");
+        section === "anime" ||
+        location.pathname.startsWith("/anime");
 
     const [query, setQuery] = useState("");
 
@@ -96,9 +98,31 @@ export default function SearchPage() {
         useRef(0);
 
     /*
-     * =================================================
-     * NORMALIZE IMAGE URL
-     * =================================================
+- =================================================
+- RESET STATE WHEN SWITCHING CINEMA <-> ANIME
+- =================================================
+     */
+
+    useEffect(() => {
+        searchRequestRef.current += 1;
+        setQuery("");
+        setResults([]);
+        setError("");
+        setPage(1);
+        setHasMore(false);
+        setLoading(false);
+        setLoadingMore(false);
+        setFiltersOpen(false);
+        setFilters({
+            mediaType: "all",
+            genre: "all",
+        });
+    }, [isAnime]);
+
+    /*
+- =================================================
+- NORMALIZE IMAGE URL
+- =================================================
      */
 
     function normalizeImageUrl(
@@ -123,9 +147,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * LOAD SEARCH PAGE
-     * =================================================
+- =================================================
+- LOAD SEARCH PAGE
+- =================================================
      */
 
     async function loadSearchPage(
@@ -245,14 +269,6 @@ export default function SearchPage() {
                 );
             }
 
-            /*
-             * If the backend returned a full page,
-             * assume another page may exist.
-             *
-             * If fewer than 10 results came back,
-             * we've reached the end.
-             */
-
             setHasMore(
                 normalizedResults.length >= 10
             );
@@ -296,9 +312,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * SEARCH
-     * =================================================
+- =================================================
+- SEARCH
+- =================================================
      */
 
     async function handleSearch() {
@@ -329,9 +345,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * LOAD MORE
-     * =================================================
+- =================================================
+- LOAD MORE
+- =================================================
      */
 
     async function loadMore() {
@@ -352,9 +368,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * KEYBOARD
-     * =================================================
+- =================================================
+- KEYBOARD
+- =================================================
      */
 
     function handleKeyDown(
@@ -366,9 +382,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * INFINITE SCROLL
-     * =================================================
+- =================================================
+- INFINITE SCROLL
+- =================================================
      */
 
     useEffect(() => {
@@ -412,9 +428,9 @@ export default function SearchPage() {
     ]);
 
     /*
-     * =================================================
-     * MEDIA TYPES
-     * =================================================
+- =================================================
+- MEDIA TYPES
+- =================================================
      */
 
     const mediaTypes =
@@ -433,9 +449,9 @@ export default function SearchPage() {
         }, [results]);
 
     /*
-     * =================================================
-     * GENRES
-     * =================================================
+- =================================================
+- GENRES
+- =================================================
      */
 
     const genres =
@@ -452,9 +468,9 @@ export default function SearchPage() {
         }, [results]);
 
     /*
-     * =================================================
-     * FILTERED RESULTS
-     * =================================================
+- =================================================
+- FILTERED RESULTS
+- =================================================
      */
 
     const filteredResults =
@@ -496,9 +512,9 @@ export default function SearchPage() {
         !!error;
 
     /*
-     * =================================================
-     * CLEAR FILTERS
-     * =================================================
+- =================================================
+- CLEAR FILTERS
+- =================================================
      */
 
     function clearFilters() {
@@ -509,9 +525,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * FORMAT MEDIA TYPE
-     * =================================================
+- =================================================
+- FORMAT MEDIA TYPE
+- =================================================
      */
 
     function formatMediaType(
@@ -554,44 +570,48 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * OPEN RESULT
-     * =================================================
+- =================================================
+- OPEN RESULT
+- =================================================
      */
 
     function openResult(
         item: SearchResult
     ) {
+        const normalizedType =
+            item.media_type?.toLowerCase();
+
         if (
             isAnime ||
-            item.media_type ===
-                "anime"
+            normalizedType === "anime"
         ) {
-            if (
-                item.anilist_id ==
-                null
-            ) {
+            const animeId =
+                item.anilist_id ??
+                item.tmdb_id;
+
+            if (animeId == null) {
+                return;
+            }
+
+            if (normalizedType === "movie") {
+                navigate(
+                    `/anime/movie/${animeId}`
+                );
                 return;
             }
 
             navigate(
-                `/anime/anime/${item.anilist_id}`
+                `/anime/tv/${animeId}`
             );
 
             return;
         }
 
-        if (
-            item.tmdb_id ==
-            null
-        ) {
+        if (item.tmdb_id == null) {
             return;
         }
 
-        if (
-            item.media_type ===
-            "tv"
-        ) {
+        if (normalizedType === "tv") {
             navigate(
                 `/cinema/tv/${item.tmdb_id}`
             );
@@ -605,9 +625,9 @@ export default function SearchPage() {
     }
 
     /*
-     * =================================================
-     * FILTER OUTSIDE CLICK
-     * =================================================
+- =================================================
+- FILTER OUTSIDE CLICK
+- =================================================
      */
 
     useEffect(() => {
@@ -640,9 +660,9 @@ export default function SearchPage() {
     }, [filtersOpen]);
 
     /*
-     * =================================================
-     * ESCAPE
-     * =================================================
+- =================================================
+- ESCAPE
+- =================================================
      */
 
     useEffect(() => {
@@ -673,9 +693,9 @@ export default function SearchPage() {
     }, []);
 
     /*
-     * =================================================
-     * PAGE
-     * =================================================
+- =================================================
+- PAGE
+- =================================================
      */
 
     return (

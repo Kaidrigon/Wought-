@@ -1,3 +1,4 @@
+
 import type {
     AnimePlayerEvent,
     AnimePlayerOptions,
@@ -33,11 +34,9 @@ const animeProviders: AnimeVideoProvider[] = [
     (a, b) => b.priority - a.priority
 );
 
-
 let activeAnimeRequest: AnimePlayerRequest | null = null;
 
 let activeAnimeProviderId: AnimePlayerProviderId | null = null;
-
 
 export function getAnimeProvider(
     providerId: AnimePlayerProviderId
@@ -48,7 +47,6 @@ export function getAnimeProvider(
         ) ?? null
     );
 }
-
 
 function buildProviderUrl(
     provider: AnimeVideoProvider,
@@ -69,7 +67,6 @@ function buildProviderUrl(
     );
 }
 
-
 export function buildAnimePlayerUrl(
     request: AnimePlayerRequest,
     providerId: AnimePlayerProviderId,
@@ -81,8 +78,17 @@ export function buildAnimePlayerUrl(
     const provider = getAnimeProvider(providerId);
 
     if (!provider || !provider.supports(request)) {
+        console.warn(
+            "[ANIME PLAYER MANAGER] Provider does not support request:",
+            {
+                providerId,
+                request,
+            }
+        );
+
         activeAnimeRequest = null;
         activeAnimeProviderId = null;
+
         return null;
     }
 
@@ -93,20 +99,35 @@ export function buildAnimePlayerUrl(
     );
 
     if (!url) {
+        console.warn(
+            "[ANIME PLAYER MANAGER] Could not build provider URL:",
+            providerId
+        );
+
         activeAnimeRequest = null;
         activeAnimeProviderId = null;
+
         return null;
     }
 
     activeAnimeRequest = { ...request };
     activeAnimeProviderId = provider.id;
 
+    console.info(
+        "[ANIME PLAYER MANAGER] Player initialized:",
+        {
+            provider: provider.id,
+            anilistId: request.anilistId,
+            episode: request.episode,
+            language: request.language,
+        }
+    );
+
     return {
         provider,
         url,
     };
 }
-
 
 export function buildAnimePlayer(
     request: AnimePlayerRequest,
@@ -136,15 +157,23 @@ export function buildAnimePlayer(
         activeAnimeRequest = { ...request };
         activeAnimeProviderId = provider.id;
 
+        console.info(
+            "[ANIME PLAYER MANAGER] Automatic provider selected:",
+            provider.id
+        );
+
         return {
             provider,
             url,
         };
     }
 
+    console.warn(
+        "[ANIME PLAYER MANAGER] No compatible provider found."
+    );
+
     return null;
 }
-
 
 export function parseAnimePlayerEvent(
     event: MessageEvent
@@ -153,6 +182,10 @@ export function parseAnimePlayerEvent(
         !activeAnimeRequest ||
         !activeAnimeProviderId
     ) {
+        console.warn(
+            "[ANIME PLAYER MANAGER] Received message without an active player request."
+        );
+
         return null;
     }
 
@@ -161,6 +194,11 @@ export function parseAnimePlayerEvent(
     );
 
     if (!provider?.parseEvent) {
+        console.warn(
+            "[ANIME PLAYER MANAGER] Active provider has no event parser:",
+            activeAnimeProviderId
+        );
+
         return null;
     }
 
@@ -170,16 +208,25 @@ export function parseAnimePlayerEvent(
         return null;
     }
 
-    return {
+    const enrichedEvent: AnimePlayerEvent = {
         ...playerEvent,
-
         anilistId: activeAnimeRequest.anilistId,
         episode: activeAnimeRequest.episode,
     };
+
+    console.info(
+        "[ANIME PLAYER MANAGER] Enriched player event:",
+        enrichedEvent
+    );
+
+    return enrichedEvent;
 }
 
-
 export function clearAnimePlayerRequest(): void {
+    console.info(
+        "[ANIME PLAYER MANAGER] Clearing active player request."
+    );
+
     activeAnimeRequest = null;
     activeAnimeProviderId = null;
 }

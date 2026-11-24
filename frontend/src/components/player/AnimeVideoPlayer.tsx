@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+
+import { useEffect } from "react";
 
 import "./VideoPlayer.css";
 
@@ -10,76 +11,64 @@ import type {
     AnimePlayerEvent,
 } from "../../services/player/animeTypes";
 
-
 type AnimeVideoPlayerProps = {
     url: string;
-
     title?: string;
-
-    onEvent?: (
-        event: AnimePlayerEvent
-    ) => void;
+    onEvent?: (event: AnimePlayerEvent) => void;
 };
-
 
 export default function AnimeVideoPlayer({
     url,
     title = "Wought+ Anime Player",
     onEvent,
 }: AnimeVideoPlayerProps) {
-
-    const iframeRef =
-        useRef<HTMLIFrameElement | null>(
-            null
-        );
-
-
     useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            // Ignore messages that aren't coming from the player iframe.
+            const iframe = document.querySelector<HTMLIFrameElement>(
+                ".video-player__iframe"
+            );
 
-        const handleMessage = (
-            event: MessageEvent
-        ) => {
-
-            const playerEvent =
-                parseAnimePlayerEvent(
-                    event
-                );
-
-
-            if (!playerEvent) {
+            if (
+                iframe?.contentWindow &&
+                event.source !== iframe.contentWindow
+            ) {
                 return;
             }
 
+            // Log the raw message so we can inspect provider events.
+            console.debug("[ANIME PLAYER] Raw message:", {
+                origin: event.origin,
+                data: event.data,
+            });
 
-            onEvent?.(
+            const playerEvent = parseAnimePlayerEvent(event);
+
+            if (!playerEvent) {
+                console.debug(
+                    "[ANIME PLAYER] Message was not recognized."
+                );
+                return;
+            }
+
+            console.info(
+                "[ANIME PLAYER] Parsed event:",
                 playerEvent
             );
+
+            onEvent?.(playerEvent);
         };
 
-
-        window.addEventListener(
-            "message",
-            handleMessage
-        );
-
+        window.addEventListener("message", handleMessage);
 
         return () => {
-
-            window.removeEventListener(
-                "message",
-                handleMessage
-            );
-
+            window.removeEventListener("message", handleMessage);
         };
-
     }, [onEvent]);
-
 
     return (
         <div className="video-player">
-
             <iframe
-                ref={iframeRef}
                 className="video-player__iframe"
                 src={url}
                 title={title}
@@ -87,7 +76,6 @@ export default function AnimeVideoPlayer({
                 allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="origin"
             />
-
         </div>
     );
 }
