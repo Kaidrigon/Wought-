@@ -1,0 +1,332 @@
+
+.anime-trending {
+    position: relative;
+    width: 100%;
+    padding: 5.5rem 0 4.5rem;
+    color: #f5f5f5;
+    background:
+        radial-gradient(
+            ellipse at 78% 25%,
+            rgba(89, 231, 203, 0.055),
+            transparent 36%
+        ),
+        #050505;
+    overflow: hidden;
+}
+
+.anime-trending__inner {
+    width: min(calc(100% - 6rem), 120rem);
+    margin: 0 auto;
+}
+
+/* Topline */
+
+.anime-trending__topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(89, 231, 203, 0.17);
+}
+
+.anime-trending__eyebrow,
+.anime-trending__edition {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: #91a6a1;
+    font-size: 0.63rem;
+    font-weight: 750;
+    letter-spacing: 0.17em;
+}
+
+.anime-trending__signal {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #59e7cb;
+    box-shadow: 0 0 12px rgba(89, 231, 203, 0.8);
+    animation: trendingSignal 1.8s ease-in-out infinite;
+}
+
+.anime-trending__edition {
+    color: #65716e;
+}
+
+/* Header */
+
+.anime-trending__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2.5rem 0 2rem;
+}
+
+.anime-trending__heading {
+    min-width: 0;
+}
+
+.anime-trending__kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.85rem;
+    color: #59e7cb;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.anime-trending__heading h2 {
+    margin: 0;
+    color: #f5f5f5;
+    font-size: clamp(2.3rem, 5vw, 4.5rem);
+    font-weight: 850;
+    letter-spacing: -0.075em;
+    line-height: 0.98;
+}
+
+.anime-trending__heading h2 span {
+    color: #59e7cb;
+}
+
+.anime-trending__heading p {
+    max-width: 32rem;
+    margin: 1rem 0 0;
+    color: #91a09c;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.anime-trending__controls {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-shrink: 0;
+}
+
+.anime-trending__count {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    text-align: right;
+}
+
+.anime-trending__count strong {
+    color: #59e7cb;
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.anime-trending__count span {
+    color: #71817c;
+    font-size: 0.54rem;
+    font-weight: 750;
+    letter-spacing: 0.13em;
+}
+
+.anime-trending__arrows {
+    display: flex;
+    gap: 0.55rem;
+}
+
+.anime-trending__arrows button {
+    display: grid;
+    width: 43px;
+    height: 43px;
+    place-items: center;
+    border: 1px solid rgba(89, 231, 203, 0.28);
+    border-radius: 50%;
+    color: #59e7cb;
+    background: rgba(89, 231, 203, 0.035);
+    cursor: pointer;
+    transition:
+        color 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.anime-trending__arrows button:hover {
+    color: #050505;
+    background: #59e7cb;
+    border-color: #59e7cb;
+    transform: translateY(-3px);
+}
+
+/* Rail */
+
+.anime-trending__rail-marker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: #70817c;
+    font-size: 0.56rem;
+    font-weight: 750;
+    letter-spacing: 0.15em;
+}
+
+.anime-trending__rail-marker span:first-child {
+    color: #59e7cb;
+    font-variant-numeric: tabular-nums;
+}
+
+.anime-trending__rail-marker div {
+    width: 35px;
+    height: 1px;
+    background: rgba(89, 231, 203, 0.45);
+}
+
+.anime-trending__rail {
+    display: grid;
+    grid-auto-columns: clamp(145px, 15vw, 205px);
+    grid-auto-flow: column;
+    gap: clamp(1rem, 1.7vw, 1.6rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.35rem 0 1.5rem;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(89, 231, 203, 0.35) transparent;
+}
+
+.anime-trending__rail::-webkit-scrollbar {
+    height: 4px;
+}
+
+.anime-trending__rail::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.anime-trending__rail::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(89, 231, 203, 0.35);
+}
+
+.anime-trending__item {
+    min-width: 0;
+    scroll-snap-align: start;
+}
+
+/* Footer */
+
+.anime-trending__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(89, 231, 203, 0.12);
+    color: #71817c;
+    font-size: 0.56rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+}
+
+.anime-trending__footer > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.anime-trending__footer-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #59e7cb;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .anime-trending {
+        padding: 3.5rem 0;
+    }
+
+    .anime-trending__inner {
+        width: calc(100% - 2.5rem);
+    }
+
+    .anime-trending__header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 2rem 0 1.5rem;
+    }
+
+    .anime-trending__controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .anime-trending__count {
+        text-align: left;
+    }
+
+    .anime-trending__rail {
+        grid-auto-columns: clamp(140px, 37vw, 185px);
+        gap: 1rem;
+    }
+
+    .anime-trending__edition {
+        font-size: 0.52rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .anime-trending__inner {
+        width: calc(100% - 2rem);
+    }
+
+    .anime-trending__eyebrow,
+    .anime-trending__edition {
+        font-size: 0.5rem;
+    }
+
+    .anime-trending__heading h2 {
+        font-size: 2.65rem;
+    }
+
+    .anime-trending__heading p {
+        font-size: 0.8rem;
+    }
+
+    .anime-trending__arrows button {
+        width: 38px;
+        height: 38px;
+    }
+
+    .anime-trending__footer {
+        font-size: 0.48rem;
+    }
+}
+
+@keyframes trendingSignal {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 12px rgba(89, 231, 203, 0.8);
+    }
+
+    50% {
+        opacity: 0.45;
+        box-shadow: 0 0 3px rgba(89, 231, 203, 0.3);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anime-trending__signal {
+        animation: none;
+    }
+
+    .anime-trending__rail {
+        scroll-behavior: auto;
+    }
+
+    .anime-trending__arrows button {
+        transition: none;
+    }
+}

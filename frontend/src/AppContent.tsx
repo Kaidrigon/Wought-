@@ -1,3 +1,4 @@
+
 import {
     Routes,
     Route,
@@ -10,6 +11,7 @@ import SeasonPage from "./pages/SeasonPage";
 import PersonDetailPage from "./pages/PersonDetailPage";
 import WatchPage from "./pages/WatchPage";
 import AnimeWatchPage from "./pages/AnimeWatchPage";
+import DMCAPage from "./pages/DMCAPage";
 
 import AppLayout from "./components/layout/AppLayout/AppLayout";
 
@@ -50,6 +52,12 @@ export default function AppContent() {
                 <Route
                     path="/anime"
                     element={<AnimePage />}
+                />
+
+                {/* LEGAL */}
+                <Route
+                    path="/dmca"
+                    element={<DMCAPage />}
                 />
 
                 {/* MOVIES */}
@@ -122,7 +130,11 @@ export default function AppContent() {
                     path="/anime/movie/:id"
                     element={<DetailPage />}
                 />
-                <Route path="/anime/tv/:id" element={<DetailPage />} />
+
+                <Route
+                    path="/anime/tv/:id"
+                    element={<DetailPage />}
+                />
 
                 {/* WATCH — CINEMA */}
                 <Route
